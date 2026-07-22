@@ -30,6 +30,8 @@ import {
   Divider,
   Modal,
   Zoom,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { 
   Facebook, 
@@ -47,7 +49,6 @@ import {
   LocationOn, 
   Phone,
   KeyboardArrowUp,
-  Twitter,
   Instagram,
   Copyright,
   Send,
@@ -83,7 +84,7 @@ import { SiTypescript, SiVite, SiExpress, SiMongodb, SiTailwindcss, SiRedux, SiN
 import emailjs from '@emailjs/browser';
 import CvLivre from "./CvLivre";
 
-const HEADER_HEIGHT = 80;
+const HEADER_HEIGHT = 70;
 
 // Fallback affiché quand une image de projet est introuvable
 const PLACEHOLDER_IMG =
@@ -397,6 +398,9 @@ function ScrollToTop() {
 }
 
 export default function Accueil() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   const [openMenu, setOpenMenu] = useState(false);
   const [openSkillDetail, setOpenSkillDetail] = useState<string | null>(null);
   const [openConnaissanceDetail, setOpenConnaissanceDetail] = useState<string | null>(null);
@@ -495,14 +499,12 @@ export default function Accueil() {
   };
 
   const menuItems = [
-    { id: "about", icon: <PersonOutline /> },
-    { id: "connaissances", icon: <School /> },
-    { id: "competences", icon: <Code /> },
-    { id: "projects", icon: <WorkOutline /> },
-    { id: "contact", icon: <MailOutline /> },
+    { id: "about", label: "ABOUT", icon: <PersonOutline /> },
+    { id: "connaissances", label: "KNOWLEDGE", icon: <School /> },
+    { id: "competences", label: "SKILLS", icon: <Code /> },
+    { id: "projects", label: "PROJECTS", icon: <WorkOutline /> },
+    { id: "contact", label: "CONTACT", icon: <MailOutline /> },
   ] as const;
-
-  const navLabel = (id: string) => t.nav[id as keyof typeof t.nav];
 
   const fullText = t.about;
 
@@ -512,6 +514,7 @@ export default function Accueil() {
       const offset = element.getBoundingClientRect().top + window.pageYOffset - HEADER_HEIGHT - 20;
       window.scrollTo({ top: offset, behavior: "smooth" });
     }
+    if (isMobile) setOpenMenu(false);
   };
 
   useEffect(() => {
@@ -1065,36 +1068,200 @@ export default function Accueil() {
         ))}
       </Box>
 
-      {/* Header */}
-      <Box position="fixed" top={0} left={0} width="100%" height={`${HEADER_HEIGHT}px`} sx={{ bgcolor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", zIndex: 100, boxShadow: "0 4px 30px rgba(0,0,0,0.05)", borderBottom: "1px solid rgba(0,80,255,0.2)" }}>
-        <Container maxWidth="lg" sx={{ height: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", px: { xs: 2, sm: 3, md: 4 } }}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Box sx={{ width: 36, height: 36, bgcolor: "#0050FF", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 20, color: "#fff", boxShadow: "0 4px 12px rgba(0,80,255,0.3)", transition: "transform 0.3s ease", "&:hover": { transform: "rotate(5deg) scale(1.05)" } }}>LR</Box>
-            <Typography fontWeight={800} fontSize={{ xs: 13, sm: 16, md: 18 }} color="#000" noWrap>Lucia Rasoanirina <Box component="span" fontWeight={400} color="#666" ml={1} sx={{ display: { xs: "none", sm: "inline" } }}>/ {t.role}</Box></Typography>
+      {/* Header corrigé pour Netlify */}
+      <Box 
+        component="header"
+        position="fixed" 
+        top={0} 
+        left={0} 
+        width="100%" 
+        height={`${HEADER_HEIGHT}px`} 
+        sx={{ 
+          bgcolor: "rgba(255,255,255,0.95)", 
+          backdropFilter: "blur(12px)", 
+          zIndex: 100, 
+          boxShadow: "0 4px 30px rgba(0,0,0,0.05)", 
+          borderBottom: "1px solid rgba(0,80,255,0.2)",
+          display: "flex",
+          alignItems: "center",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <Container maxWidth="lg" sx={{ 
+          height: "100%", 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          px: { xs: 2, sm: 3, md: 4 } 
+        }}>
+          {/* Logo */}
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ flexShrink: 0 }}>
+            <Box sx={{ 
+              width: { xs: 32, sm: 36 }, 
+              height: { xs: 32, sm: 36 }, 
+              bgcolor: "#0050FF", 
+              borderRadius: "10px", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              fontWeight: 800, 
+              fontSize: { xs: 16, sm: 20 }, 
+              color: "#fff", 
+              boxShadow: "0 4px 12px rgba(0,80,255,0.3)", 
+              transition: "transform 0.3s ease", 
+              "&:hover": { transform: "rotate(5deg) scale(1.05)" } 
+            }}>
+              LR
+            </Box>
+            <Typography fontWeight={800} fontSize={{ xs: 12, sm: 16, md: 18 }} color="#000" noWrap>
+              Lucia Rasoanirina 
+              <Box component="span" fontWeight={400} color="#666" ml={1} sx={{ display: { xs: "none", sm: "inline" } }}>
+                / {t.role}
+              </Box>
+            </Typography>
           </Stack>
-          <Stack direction="row" spacing={{ md: 2, lg: 3 }} sx={{ display: { xs: "none", md: "flex" } }}>
+
+          {/* Menu Desktop */}
+          <Stack 
+            direction="row" 
+            spacing={{ md: 1.5, lg: 3 }} 
+            sx={{ 
+              display: { xs: "none", md: "flex" },
+              alignItems: "center"
+            }}
+          >
             {menuItems.map((item) => (
-              <Stack key={item.id} direction="row" spacing={0.8} alignItems="center" onClick={() => scrollToSection(item.id)} sx={{ cursor: "pointer", transition: "all 0.3s", color: activeSection === item.id ? "#0050FF" : "#111", transform: activeSection === item.id ? "translateY(-2px)" : "none", "&:hover": { color: "#0050FF", transform: "translateY(-3px)", "& .menu-icon": { transform: "scale(1.2) rotate(360deg)", opacity: 1 } } }}>
-                <Box className="menu-icon" sx={{ fontSize: 16, opacity: 0.7, transition: "all 0.4s" }}>{item.icon}</Box>
-                <Typography fontSize={12} fontWeight={600} sx={{ letterSpacing: "0.12em", fontFamily: "monospace" }}>{navLabel(item.id)}{activeSection === item.id && " {}"}</Typography>
+              <Stack 
+                key={item.id} 
+                direction="row" 
+                spacing={0.8} 
+                alignItems="center" 
+                onClick={() => scrollToSection(item.id)} 
+                sx={{ 
+                  cursor: "pointer", 
+                  transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", 
+                  color: activeSection === item.id ? "#0050FF" : "#111", 
+                  transform: activeSection === item.id ? "translateY(-2px)" : "none", 
+                  "&:hover": { 
+                    color: "#0050FF", 
+                    transform: "translateY(-3px)", 
+                    "& .menu-icon": { transform: "scale(1.2) rotate(360deg)", opacity: 1 } 
+                  },
+                  px: 0.5,
+                  py: 1,
+                }}
+              >
+                <Box className="menu-icon" sx={{ 
+                  fontSize: 16, 
+                  opacity: 0.7, 
+                  transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)" 
+                }}>
+                  {item.icon}
+                </Box>
+                <Typography fontSize={{ md: 11, lg: 12 }} fontWeight={600} sx={{ 
+                  letterSpacing: "0.12em", 
+                  fontFamily: "monospace",
+                  whiteSpace: "nowrap"
+                }}>
+                  {item.label}
+                  {activeSection === item.id && " {}"}
+                </Typography>
               </Stack>
             ))}
           </Stack>
-          <IconButton sx={{ display: { xs: "flex", md: "none" } }} onClick={() => setOpenMenu(true)}><Menu /></IconButton>
+
+          {/* Bouton menu mobile */}
+          <IconButton 
+            sx={{ 
+              display: { xs: "flex", md: "none" },
+              p: 1,
+              borderRadius: 2,
+              transition: "all 0.3s ease",
+              "&:hover": { bgcolor: "rgba(0,80,255,0.08)" }
+            }} 
+            onClick={() => setOpenMenu(true)}
+            size="small"
+          >
+            <Menu sx={{ fontSize: { xs: 24, sm: 28 } }} />
+          </IconButton>
         </Container>
       </Box>
 
-      {/* Mobile Drawer */}
-      <Drawer anchor="right" open={openMenu} onClose={() => setOpenMenu(false)}>
-        <Box sx={{ width: 280, p: 2, height: "100%", bgcolor: "#F9F7F5" }}>
-          <Stack direction="row" justifyContent="flex-end" mb={2}><IconButton onClick={() => setOpenMenu(false)}><Close /></IconButton></Stack>
-          <List>{menuItems.map(item => {
+      {/* Mobile Drawer amélioré */}
+      <Drawer 
+        anchor="right" 
+        open={openMenu} 
+        onClose={() => setOpenMenu(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: { xs: '100%', sm: 320 },
+            bgcolor: "#F9F7F5",
+            p: 3,
+            boxSizing: 'border-box',
+          }
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
+          <Typography fontWeight={700} fontSize={20} color="#000">
+            Menu
+          </Typography>
+          <IconButton 
+            onClick={() => setOpenMenu(false)}
+            sx={{ 
+              transition: "transform 0.3s ease",
+              "&:hover": { transform: "rotate(90deg)" }
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Stack>
+        <List sx={{ p: 0 }}>
+          {menuItems.map(item => {
             const active = activeSection === item.id;
             return (
-            <ListItem key={item.id} disablePadding><ListItemButton onClick={() => { scrollToSection(item.id); setOpenMenu(false); }} sx={{ borderRadius: 2, mb: 1, transition: "all 0.25s", bgcolor: active ? "rgba(0,80,255,0.12)" : "transparent", borderLeft: active ? "3px solid #0050FF" : "3px solid transparent", "&:hover": { bgcolor: "rgba(0,80,255,0.1)", transform: "translateX(8px)" } }}><Box sx={{ minWidth: 40, color: "#0050FF" }}>{item.icon}</Box><ListItemText primary={active ? `${navLabel(item.id)} {}` : navLabel(item.id)} primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 800 : 600, letterSpacing: "0.12em", color: active ? "#0050FF" : "#000", fontFamily: "monospace" }} /></ListItemButton></ListItem>
+              <ListItem key={item.id} disablePadding sx={{ mb: 1.5 }}>
+                <ListItemButton 
+                  onClick={() => { scrollToSection(item.id); }} 
+                  sx={{ 
+                    borderRadius: 2, 
+                    transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", 
+                    bgcolor: active ? "rgba(0,80,255,0.12)" : "transparent", 
+                    borderLeft: active ? "4px solid #0050FF" : "4px solid transparent",
+                    py: 2,
+                    px: 2,
+                    "&:hover": { 
+                      bgcolor: "rgba(0,80,255,0.08)", 
+                      transform: "translateX(8px)" 
+                    } 
+                  }}
+                >
+                  <Box sx={{ minWidth: 44, color: active ? "#0050FF" : "#666" }}>
+                    {item.icon}
+                  </Box>
+                  <ListItemText 
+                    primary={active ? `${item.label} {}` : item.label} 
+                    primaryTypographyProps={{ 
+                      fontSize: 15, 
+                      fontWeight: active ? 800 : 500, 
+                      letterSpacing: "0.12em", 
+                      color: active ? "#0050FF" : "#000", 
+                      fontFamily: "monospace" 
+                    }} 
+                  />
+                  {active && (
+                    <Box sx={{ 
+                      width: 8, 
+                      height: 8, 
+                      bgcolor: "#0050FF", 
+                      borderRadius: "50%",
+                      ml: 1
+                    }} />
+                  )}
+                </ListItemButton>
+              </ListItem>
             );
-          })}</List>
-        </Box>
+          })}
+        </List>
       </Drawer>
 
       {/* Main Content */}
@@ -1596,9 +1763,6 @@ export default function Accueil() {
                   <IconButton size="medium" href="https://www.linkedin.com/in/lucia-rasoanirina/" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}>
                     <LinkedIn />
                   </IconButton>
-                  <IconButton size="medium" href="#" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}>
-                    <Twitter />
-                  </IconButton>
                   <IconButton size="medium" href="https://www.instagram.com/rasoanirinambolatiana" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}>
                     <Instagram />
                   </IconButton>
@@ -1620,7 +1784,7 @@ export default function Accueil() {
                   {menuItems.slice(0, 2).map(item => (
                     <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
                       <Box sx={{ color: "#aaa", fontSize: 18, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{navLabel(item.id)}</Typography>
+                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{item.label}</Typography>
                     </Stack>
                   ))}
                 </Stack>
@@ -1629,13 +1793,9 @@ export default function Accueil() {
                   {menuItems.slice(2, 5).map(item => (
                     <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
                       <Box sx={{ color: "#aaa", fontSize: 18, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{navLabel(item.id)}</Typography>
+                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{item.label}</Typography>
                     </Stack>
                   ))}
-                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { "& svg": { transform: "scale(1.1)", color: "#0050FF" }, "& p": { color: "#0050FF" } } }}>
-                    <MailOutline sx={{ color: "#aaa", fontSize: 18, flexShrink: 0, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                    <Typography variant="body2" sx={{ color: "#ccc", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", fontSize: "0.78rem", wordBreak: "break-word" }}>luciarasoanirina8@gmail.com</Typography>
-                  </Stack>
                 </Stack>
               </Stack>
             </Grid>
