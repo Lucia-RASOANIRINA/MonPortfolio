@@ -23,59 +23,59 @@ import {
   Close,
   NavigateNext,
   NavigateBefore,
+  Code,
 } from "@mui/icons-material";
 
 interface CvLivreProps {
   onClose?: () => void;
 }
 
-function SectionTitle({ children }: { children: ReactNode }) {
+function PageHeader({ label }: { label: string }) {
   return (
     <Stack
       direction="row"
-      spacing={1}
+      justifyContent="space-between"
       alignItems="center"
       sx={{
-        mb: { xs: 1, sm: 1.5, md: 1.75 },
-        pb: 0.8,
-        borderBottom: "2px solid rgba(0,80,255,0.15)",
+        px: { xs: 2, sm: 3, md: 4 },
+        py: { xs: 1, sm: 1.2 },
+        borderBottom: "1px solid rgba(0,80,255,0.15)",
+        bgcolor: "#ffffff",
       }}
     >
-      <Box
-        sx={{
-          width: { xs: 14, sm: 16 },
-          height: { xs: 14, sm: 16 },
-          borderRadius: "50%",
-          bgcolor: "#0050FF",
-          flexShrink: 0,
-          boxShadow: "0 0 0 3px rgba(0,80,255,0.12)",
-        }}
-      />
-      <Typography
-        sx={{
-          fontSize: { xs: "0.6rem", sm: "0.7rem" },
-          fontWeight: 700,
-          color: "#0050FF",
-          letterSpacing: 2,
-          textTransform: "uppercase",
-        }}
-      >
+      <Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem" }, fontWeight: 700, color: "#0a0a2e", letterSpacing: 3, textTransform: "uppercase" }}>
+        Lucia Rasoanirina
+      </Typography>
+      <Stack direction="row" spacing={0.8} alignItems="center">
+        <Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, fontWeight: 600, color: "#0050FF", letterSpacing: 2 }}>
+          {label}
+        </Typography>
+        <Box sx={{ width: 20, height: 20, bgcolor: "#0050FF", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 9 }}>
+          LR
+        </Box>
+      </Stack>
+    </Stack>
+  );
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <Stack direction="row" spacing={0.8} alignItems="center" sx={{ mb: { xs: 0.6, sm: 0.8 } }}>
+      <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#0050FF", flexShrink: 0 }} />
+      <Typography sx={{ fontSize: { xs: "0.58rem", sm: "0.66rem" }, fontWeight: 700, color: "#0050FF", letterSpacing: 1.8, textTransform: "uppercase" }}>
         {children}
       </Typography>
     </Stack>
   );
 }
 
-function SectionCard({ children, sx }: { children: ReactNode; sx?: object }) {
+function SectionBlock({ children, tint = true }: { children: ReactNode; tint?: boolean }) {
   return (
     <Box
       sx={{
-        border: "1px solid rgba(0,80,255,0.10)",
         borderRadius: 2,
-        p: { xs: 1.5, sm: 2 },
-        bgcolor: "#fff",
-        boxShadow: "0 2px 10px rgba(10,10,46,0.03)",
-        ...sx,
+        p: { xs: 1.1, sm: 1.4 },
+        bgcolor: tint ? "rgba(0,80,255,0.03)" : "transparent",
       }}
     >
       {children}
@@ -83,8 +83,8 @@ function SectionCard({ children, sx }: { children: ReactNode; sx?: object }) {
   );
 }
 
-/* Bande façon "tranche de livre" (cf. modèle 1) : toujours visible sur le
-   bord gauche du livre, avec le nom en texte vertical. */
+/* Tranche du livre : fond blanc + texte bleu, comme le dos illustré du
+   modèle de couverture (bandeau clair, pas un bloc plein bleu). */
 function BookSpine() {
   return (
     <Box
@@ -93,46 +93,51 @@ function BookSpine() {
         left: 0,
         top: 0,
         bottom: 0,
-        width: { xs: 0, md: 22 },
+        width: { xs: 0, md: 20 },
         display: { xs: "none", md: "flex" },
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "#0050FF",
+        bgcolor: "#ffffff",
+        borderRight: "1px solid rgba(0,80,255,0.15)",
         borderRadius: "12px 0 0 12px",
-        boxShadow: "inset -6px 0 12px rgba(0,0,0,0.25)",
-        zIndex: 15,
+        boxShadow: "inset -4px 0 8px rgba(0,0,0,0.06)",
+        zIndex: 5,
         overflow: "hidden",
+        pointerEvents: "none",
       }}
     >
-      <Box sx={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 10, height: 10, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.5)" }} />
       <Typography
         sx={{
           writingMode: "vertical-rl",
           transform: "rotate(180deg)",
-          color: "#fff",
+          color: "#0050FF",
           fontWeight: 700,
           letterSpacing: 3,
-          fontSize: "0.62rem",
+          fontSize: "0.58rem",
           whiteSpace: "nowrap",
         }}
       >
-        LUCIA RASOANIRINA · FULLSTACK DEVELOPER
+        LUCIA RASOANIRINA · CV
       </Typography>
-      <Box sx={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", width: 10, height: 10, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.5)" }} />
     </Box>
   );
 }
 
-/* Petite bande façon "code-barres ISBN" pour rappeler le dos du modèle 1,
-   purement décorative. */
-function BarcodeStripe() {
-  const bars = [2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 3, 2, 1, 1, 2, 1, 3, 1, 2];
+/* Bande "code-barres" décorative type ISBN, calée en bas à gauche du dos
+   comme sur le modèle de couverture. */
+function BarcodeBlock() {
+  const bars = [2, 1, 1, 3, 1, 2, 1, 1, 3, 2, 1, 1, 2, 1, 3, 1, 1, 2];
   return (
-    <Stack direction="row" spacing={0.4} alignItems="flex-end" justifyContent="center" sx={{ height: 34, mt: 1 }}>
-      {bars.map((w, i) => (
-        <Box key={i} sx={{ width: w, height: i % 5 === 0 ? "100%" : "70%", bgcolor: "#0a0a2e" }} />
-      ))}
-    </Stack>
+    <Box sx={{ textAlign: "left" }}>
+      <Stack direction="row" spacing={0.3} alignItems="flex-end" sx={{ height: 26 }}>
+        {bars.map((w, i) => (
+          <Box key={i} sx={{ width: w, height: i % 4 === 0 ? "100%" : "65%", bgcolor: "#0a0a2e" }} />
+        ))}
+      </Stack>
+      <Typography sx={{ fontSize: "0.55rem", color: "#888", letterSpacing: 0.5, mt: 0.3 }}>
+        CV-2026-LR-001
+      </Typography>
+    </Box>
   );
 }
 
@@ -197,45 +202,8 @@ export default function CvLivre({ onClose }: CvLivreProps) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // ====== TELECHARGEMENT DU CV ======
-  // Bug corrigé : l'ancien lien combinait `download` + `target="_blank"`.
-  // Sur beaucoup de navigateurs (Safari / Chrome mobile en particulier),
-  // ces deux attributs entrent en conflit : le navigateur ouvre un nouvel
-  // onglet vide au lieu de déclencher le téléchargement. On construit donc
-  // un lien de téléchargement "pur" (sans target/rel), et on vérifie d'abord
-  // que le fichier existe réellement et qu'il s'agit bien d'un PDF (utile si
-  // l'hébergeur — ex. Netlify — renvoie la page d'accueil en fallback quand
-  // le fichier est introuvable, ce qui produisait un "faux succès").
-  const handleDownloadPDF = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    try {
-      const response = await fetch(CV_FILE_URL, { method: "HEAD" });
-      const contentType = response.headers.get("content-type") || "";
-
-      if (!response.ok || !contentType.toLowerCase().includes("pdf")) {
-        // Le fichier n'existe pas (ou le serveur renvoie autre chose qu'un
-        // PDF) : on ouvre quand même l'URL dans un nouvel onglet pour que
-        // l'utilisateur voie ce qui se passe, plutôt que d'échouer en silence.
-        window.open(CV_FILE_URL, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      const link = document.createElement("a");
-      link.href = CV_FILE_URL;
-      link.download = "CV_Lucia_Rasoanirina.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Erreur de téléchargement:", error);
-      window.open(CV_FILE_URL, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const pages = [
-    // Page 0 - Couverture (façon couverture de livre : bandeau titre + badge)
+    // Page 0 - Couverture (bandeau + titre + motif décoratif, façon couverture du modèle)
     <Box
       key="cover"
       sx={{
@@ -256,7 +224,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
       <Box sx={{ position: "absolute", top: -120, right: -120, width: 360, height: 360, borderRadius: "50%", background: "rgba(0,80,255,0.05)", filter: "blur(60px)" }} />
       <Box sx={{ position: "absolute", bottom: -120, left: -120, width: 360, height: 360, borderRadius: "50%", background: "rgba(0,80,255,0.04)", filter: "blur(60px)" }} />
 
-      {/* Bandeau "édition" façon bandeau auteur du modèle de couverture */}
+      {/* Bandeau "édition" en haut à droite, façon bandeau auteur du modèle */}
       <Box
         sx={{
           position: "absolute",
@@ -274,6 +242,14 @@ export default function CvLivre({ onClose }: CvLivreProps) {
         }}
       >
         ÉDITION 2026
+      </Box>
+
+      {/* Motif décoratif façon icônes flottantes du modèle de couverture */}
+      <Box sx={{ position: "absolute", top: { xs: 60, md: 90 }, left: { xs: 24, md: 60 }, color: "rgba(0,80,255,0.18)", display: { xs: "none", sm: "block" } }}>
+        <Code sx={{ fontSize: { sm: 34, md: 46 } }} />
+      </Box>
+      <Box sx={{ position: "absolute", bottom: { xs: 70, md: 100 }, right: { xs: 30, md: 70 }, fontSize: { sm: "1.6rem", md: "2.2rem" }, fontWeight: 800, color: "rgba(0,80,255,0.15)", display: { xs: "none", sm: "block" } }}>
+        { "{ }" }
       </Box>
 
       <Box sx={{ position: "relative", zIndex: 1 }}>
@@ -301,153 +277,159 @@ export default function CvLivre({ onClose }: CvLivreProps) {
       </Box>
     </Box>,
 
-    // Page 1 - Profil et informations (panneaux type brochure)
-    <Box key="page1" sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: { xs: "auto", md: "80vh" }, height: "100%" }}>
-      <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#fafbff", p: { xs: 2, sm: 3, md: 4 }, borderRight: { xs: "none", md: "1px solid rgba(0,80,255,0.12)" } }}>
-        <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
-          <SectionCard>
-            <SectionTitle>Profil</SectionTitle>
-            <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.85rem" }, color: "#444", lineHeight: 1.7 }}>
-              Developpeuse Full-Stack passionnee, entree dans le monde de la technologie en 2023. Animee par une forte envie d'apprendre et de construire des solutions numeriques modernes. Preference marquee pour Python.
-            </Typography>
-          </SectionCard>
+    // Page 1 - Profil et informations (en-tête + colonnes compactes, sans scroll)
+    <Box key="page1" sx={{ display: "flex", flexDirection: "column", minHeight: { xs: "auto", md: "80vh" }, height: "100%" }}>
+      <PageHeader label="PROFIL & COMPÉTENCES" />
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, flex: 1 }}>
+        <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#fafbff", p: { xs: 1.5, sm: 2, md: 3 }, borderRight: { xs: "none", md: "1px solid rgba(0,80,255,0.12)" } }}>
+          <Stack spacing={{ xs: 1, sm: 1.2 }}>
+            <SectionBlock>
+              <SectionTitle>Profil</SectionTitle>
+              <Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.74rem", md: "0.78rem" }, color: "#444", lineHeight: 1.55 }}>
+                Developpeuse Full-Stack passionnee, entree dans le monde de la technologie en 2023. Animee par une forte envie d'apprendre et de construire des solutions numeriques modernes. Preference marquee pour Python.
+              </Typography>
+            </SectionBlock>
 
-          <SectionCard>
-            <SectionTitle>Informations</SectionTitle>
-            <Stack spacing={{ xs: 1, sm: 1.5 }}>
-              <Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.7rem" }, color: "#888", fontWeight: 500 }}>Date de naissance</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>17 octobre 2005</Typography></Box>
-              <Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.7rem" }, color: "#888", fontWeight: 500 }}>Lieu</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>Ankofafa, Fianarantsoa</Typography></Box>
-              <Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.7rem" }, color: "#888", fontWeight: 500 }}>Nationalite</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>Malgache</Typography></Box>
-            </Stack>
-          </SectionCard>
+            <SectionBlock>
+              <SectionTitle>Informations</SectionTitle>
+              <Stack direction="row" flexWrap="wrap" columnGap={2.5} rowGap={0.6}>
+                <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Naissance</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>17/10/2005</Typography></Box>
+                <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Lieu</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Ankofafa, Fianarantsoa</Typography></Box>
+                <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Nationalite</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Malgache</Typography></Box>
+              </Stack>
+            </SectionBlock>
 
-          <SectionCard>
-            <SectionTitle>Langues</SectionTitle>
-            <Stack spacing={{ xs: 1, sm: 1.5 }}>
-              {[{ l: "Malagasy", lv: "Maternelle", w: "100%" }, { l: "Francais", lv: "DELF B2", w: "85%" }, { l: "Anglais", lv: "B2", w: "80%" }].map((x) => (
-                <Box key={x.l}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333" }}>{x.l}</Typography>
-                    <Typography sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, color: "#0050FF", fontWeight: 600 }}>{x.lv}</Typography>
-                  </Stack>
-                  <Box sx={{ mt: 0.5, height: 3, bgcolor: "#e0e0e0", borderRadius: 2 }}><Box sx={{ width: x.w, height: 3, bgcolor: "#0050FF", borderRadius: 2 }} /></Box>
-                </Box>
-              ))}
-            </Stack>
-          </SectionCard>
-
-          <SectionCard>
-            <SectionTitle>Certificats</SectionTitle>
-            <Stack spacing={1}>
-              <Stack direction="row" spacing={1.5} alignItems="center"><CheckCircle sx={{ fontSize: { xs: 14, sm: 16 }, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#333" }}>Certification PIX</Typography></Stack>
-              <Stack direction="row" spacing={1.5} alignItems="center"><CheckCircle sx={{ fontSize: { xs: 14, sm: 16 }, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#333" }}>Certificat en Bureautique</Typography></Stack>
-            </Stack>
-          </SectionCard>
-        </Stack>
-      </Box>
-
-      <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 2, sm: 3, md: 4 }, bgcolor: "#ffffff" }}>
-        <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
-          <SectionCard>
-            <SectionTitle>Formation</SectionTitle>
-            <Box sx={{ mb: { xs: 2, sm: 2.5 } }}>
-              <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between"><Typography sx={{ fontWeight: 600, fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.95rem" }, color: "#1a1a2e" }}>Licence en Developpement d'Applications</Typography><Typography sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, color: "#0050FF", fontWeight: 500 }}>2023 - Present</Typography></Stack>
-              <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#666" }}>3eme annee - EMIT, Universite de Fianarantsoa</Typography>
-            </Box>
-            <Box>
-              <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between"><Typography sx={{ fontWeight: 600, fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.95rem" }, color: "#1a1a2e" }}>Baccalaureat serie C</Typography><Typography sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, color: "#0050FF", fontWeight: 500 }}>2023</Typography></Stack>
-              <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#666" }}>Lycee FMJ - Talatamaty, Fianarantsoa</Typography>
-            </Box>
-          </SectionCard>
-
-          <SectionCard>
-            <SectionTitle>Centres d'interet</SectionTitle>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {["Cinema", "Series", "Tele-realite", "Basket-ball", "Cuisine", "Sport"].map((item) => (
-                <Box key={item} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: { xs: 1, sm: 1.5 }, py: { xs: 0.4, sm: 0.5, md: 0.6 }, borderRadius: 20, fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" }, fontWeight: 500 }}>{item}</Box>
-              ))}
-            </Box>
-          </SectionCard>
-
-          <SectionCard>
-            <SectionTitle>Competences Techniques</SectionTitle>
-            <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-              {[
-                { t: "Frontend", items: ["React.js", "Vue.js", "Next.js", "TypeScript", "Tailwind CSS"] },
-                { t: "Backend", items: ["PHP / Laravel", "Node.js", "Python", "NestJS"] },
-                { t: "Base de donnees", items: ["MySQL", "PostgreSQL", "MongoDB"] },
-                { t: "Outils", items: ["Git", "Figma", "Netlify", "Supabase"] },
-              ].map((g) => (
-                <Grid key={g.t} size={{ xs: 12, sm: 6 }}>
-                  <Stack spacing={0.5}>
-                    <Typography sx={{ fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.75rem" }, fontWeight: 600, color: "#333" }}>{g.t}</Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.3 }}>
-                      {g.items.map((s) => (
-                        <Box key={s} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: { xs: 0.8, sm: 1, md: 1.2 }, py: { xs: 0.2, sm: 0.3, md: 0.4 }, borderRadius: 12, fontSize: { xs: "0.55rem", sm: "0.6rem", md: "0.65rem" }, fontWeight: 500 }}>{s}</Box>
-                      ))}
-                    </Box>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
-          </SectionCard>
-        </Stack>
-      </Box>
-    </Box>,
-
-    // Page 2 - Projets et contact (panneaux type brochure)
-    <Box key="page2" sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: { xs: "auto", md: "80vh" }, height: "100%" }}>
-      <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#fafbff", p: { xs: 2, sm: 3, md: 4 }, borderRight: { xs: "none", md: "1px solid rgba(0,80,255,0.12)" } }}>
-        <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
-          <SectionCard>
-            <SectionTitle>Projets</SectionTitle>
-            <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-              {[
-                { n: "UltimateChild", d: "Site vitrine educatif", t: ["HTML5", "CSS3", "JavaScript"] },
-                { n: "Garage Pro", d: "Gestion de garage", t: ["HTML5", "CSS3", "JavaScript"] },
-                { n: "Parent'Lien", d: "Plateforme parentale (Vue 3)", t: ["Vue 3", "Vite", "WebSocket"] },
-                { n: "UrbanFlow IA", d: "Hackathon - mobilité urbaine IA", t: ["React", "Node.js", "Python"] },
-              ].map((p) => (
-                <Grid key={p.n} size={{ xs: 12, sm: 6 }}>
-                  <Box sx={{ bgcolor: "rgba(0,80,255,0.05)", border: "1px solid rgba(0,80,255,0.10)", p: { xs: 1.5, sm: 2 }, borderRadius: 2, height: "100%" }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#1a1a2e" }}>{p.n}</Typography>
-                    <Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" }, color: "#666" }}>{p.d}</Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.3, mt: 0.5 }}>
-                      {p.t.map((t) => (
-                        <Box key={t} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: { xs: 0.6, sm: 0.8, md: 1 }, py: { xs: 0.15, sm: 0.2, md: 0.3 }, borderRadius: 10, fontSize: { xs: "0.5rem", sm: "0.55rem", md: "0.6rem" } }}>{t}</Box>
-                      ))}
-                    </Box>
+            <SectionBlock>
+              <SectionTitle>Langues</SectionTitle>
+              <Stack spacing={0.6}>
+                {[{ l: "Malagasy", lv: "Maternelle", w: "100%" }, { l: "Francais", lv: "DELF B2", w: "85%" }, { l: "Anglais", lv: "B2", w: "80%" }].map((x) => (
+                  <Box key={x.l}>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333" }}>{x.l}</Typography>
+                      <Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.66rem" }, color: "#0050FF", fontWeight: 600 }}>{x.lv}</Typography>
+                    </Stack>
+                    <Box sx={{ mt: 0.3, height: 3, bgcolor: "#e0e0e0", borderRadius: 2 }}><Box sx={{ width: x.w, height: 3, bgcolor: "#0050FF", borderRadius: 2 }} /></Box>
                   </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </SectionCard>
+                ))}
+              </Stack>
+            </SectionBlock>
 
-          <SectionCard>
-            <SectionTitle>Experiences</SectionTitle>
-            <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.8rem" }, color: "#444", lineHeight: 1.6 }}>Participation a 2 Hackathons<br />Projets de groupe universitaires</Typography>
-          </SectionCard>
-        </Stack>
-      </Box>
-
-      <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 2, sm: 3, md: 4 }, bgcolor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", gap: { xs: 1.5, sm: 2, md: 2.5 } }}>
-        <SectionCard>
-          <SectionTitle>Contact</SectionTitle>
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={2} alignItems="center"><Email sx={{ color: "#0050FF", fontSize: { xs: 20, sm: 24 } }} /><Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem" }, color: "#888" }}>Email</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>luciarasoanirina8@gmail.com</Typography></Box></Stack>
-            <Stack direction="row" spacing={2} alignItems="center"><Phone sx={{ color: "#0050FF", fontSize: { xs: 20, sm: 24 } }} /><Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem" }, color: "#888" }}>Telephone</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>+261 38 702 36</Typography></Box></Stack>
-            <Stack direction="row" spacing={2} alignItems="center"><LocationOn sx={{ color: "#0050FF", fontSize: { xs: 20, sm: 24 } }} /><Box><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.65rem" }, color: "#888" }}>Localisation</Typography><Typography sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" }, color: "#333", fontWeight: 500 }}>Fianarantsoa, Madagascar</Typography></Box></Stack>
+            <SectionBlock>
+              <SectionTitle>Certificats</SectionTitle>
+              <Stack spacing={0.6}>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certification PIX</Typography></Stack>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certificat en Bureautique</Typography></Stack>
+              </Stack>
+            </SectionBlock>
           </Stack>
-        </SectionCard>
+        </Box>
 
-        <SectionCard>
-          <SectionTitle>Disponibilite</SectionTitle>
-          <Box sx={{ display: "inline-block", bgcolor: "rgba(34,197,94,0.1)", color: "#22c55e", px: 2, py: 0.8, borderRadius: 30, fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>Disponible pour mission</Box>
-        </SectionCard>
+        <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 1.5, sm: 2, md: 3 }, bgcolor: "#ffffff" }}>
+          <Stack spacing={{ xs: 1, sm: 1.2 }}>
+            <SectionBlock tint={false}>
+              <SectionTitle>Formation</SectionTitle>
+              <Box sx={{ mb: 1.2 }}>
+                <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between"><Typography sx={{ fontWeight: 600, fontSize: { xs: "0.72rem", sm: "0.8rem" }, color: "#1a1a2e" }}>Licence en Developpement d'Applications</Typography><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.68rem" }, color: "#0050FF", fontWeight: 500 }}>2023 - Present</Typography></Stack>
+                <Typography sx={{ fontSize: { xs: "0.64rem", sm: "0.7rem" }, color: "#666" }}>3eme annee - EMIT, Universite de Fianarantsoa</Typography>
+              </Box>
+              <Box>
+                <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between"><Typography sx={{ fontWeight: 600, fontSize: { xs: "0.72rem", sm: "0.8rem" }, color: "#1a1a2e" }}>Baccalaureat serie C</Typography><Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.68rem" }, color: "#0050FF", fontWeight: 500 }}>2023</Typography></Stack>
+                <Typography sx={{ fontSize: { xs: "0.64rem", sm: "0.7rem" }, color: "#666" }}>Lycee FMJ - Talatamaty, Fianarantsoa</Typography>
+              </Box>
+            </SectionBlock>
+
+            <SectionBlock>
+              <SectionTitle>Centres d'interet</SectionTitle>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                {["Cinema", "Series", "Tele-realite", "Basket-ball", "Cuisine", "Sport"].map((item) => (
+                  <Box key={item} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: 1, py: 0.35, borderRadius: 20, fontSize: { xs: "0.58rem", sm: "0.64rem" }, fontWeight: 500 }}>{item}</Box>
+                ))}
+              </Box>
+            </SectionBlock>
+
+            <SectionBlock tint={false}>
+              <SectionTitle>Competences Techniques</SectionTitle>
+              <Grid container spacing={1}>
+                {[
+                  { t: "Frontend", items: ["React.js", "Vue.js", "Next.js", "TypeScript", "Tailwind CSS"] },
+                  { t: "Backend", items: ["PHP / Laravel", "Node.js", "Python", "NestJS"] },
+                  { t: "Base de donnees", items: ["MySQL", "PostgreSQL", "MongoDB"] },
+                  { t: "Outils", items: ["Git", "Figma", "Netlify", "Supabase"] },
+                ].map((g) => (
+                  <Grid key={g.t} size={{ xs: 12, sm: 6 }}>
+                    <Stack spacing={0.4}>
+                      <Typography sx={{ fontSize: { xs: "0.6rem", sm: "0.68rem" }, fontWeight: 600, color: "#333" }}>{g.t}</Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.3 }}>
+                        {g.items.map((s) => (
+                          <Box key={s} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: 0.8, py: 0.2, borderRadius: 10, fontSize: { xs: "0.52rem", sm: "0.58rem" }, fontWeight: 500 }}>{s}</Box>
+                        ))}
+                      </Box>
+                    </Stack>
+                  </Grid>
+                ))}
+              </Grid>
+            </SectionBlock>
+          </Stack>
+        </Box>
       </Box>
     </Box>,
 
-    // Page 3 - Dos du livre (façon "À propos" + code-barres du modèle de couverture)
+    // Page 2 - Projets et contact (en-tête + listes iconographiées, façon brochure)
+    <Box key="page2" sx={{ display: "flex", flexDirection: "column", minHeight: { xs: "auto", md: "80vh" }, height: "100%" }}>
+      <PageHeader label="PROJETS & CONTACT" />
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, flex: 1 }}>
+        <Box sx={{ width: { xs: "100%", md: "50%" }, bgcolor: "#fafbff", p: { xs: 1.5, sm: 2, md: 3 }, borderRight: { xs: "none", md: "1px solid rgba(0,80,255,0.12)" } }}>
+          <Stack spacing={{ xs: 1, sm: 1.2 }}>
+            <SectionBlock tint={false}>
+              <SectionTitle>Projets</SectionTitle>
+              <Grid container spacing={1}>
+                {[
+                  { n: "UltimateChild", d: "Site vitrine educatif", t: ["HTML5", "CSS3", "JavaScript"] },
+                  { n: "Garage Pro", d: "Gestion de garage", t: ["HTML5", "CSS3", "JavaScript"] },
+                  { n: "Parent'Lien", d: "Plateforme parentale (Vue 3)", t: ["Vue 3", "Vite", "WebSocket"] },
+                  { n: "UrbanFlow IA", d: "Hackathon - mobilité urbaine IA", t: ["React", "Node.js", "Python"] },
+                ].map((p) => (
+                  <Grid key={p.n} size={{ xs: 12, sm: 6 }}>
+                    <Box sx={{ bgcolor: "rgba(0,80,255,0.05)", p: 1.2, borderRadius: 2, height: "100%" }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.76rem" }, color: "#1a1a2e" }}>{p.n}</Typography>
+                      <Typography sx={{ fontSize: { xs: "0.56rem", sm: "0.62rem" }, color: "#666" }}>{p.d}</Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.3, mt: 0.4 }}>
+                        {p.t.map((t) => (
+                          <Box key={t} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: 0.7, py: 0.15, borderRadius: 10, fontSize: { xs: "0.48rem", sm: "0.54rem" } }}>{t}</Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </SectionBlock>
+
+            <SectionBlock>
+              <SectionTitle>Experiences</SectionTitle>
+              <Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#444", lineHeight: 1.5 }}>Participation a 2 Hackathons · Projets de groupe universitaires</Typography>
+            </SectionBlock>
+          </Stack>
+        </Box>
+
+        <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 1.5, sm: 2, md: 3 }, bgcolor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", gap: 1.2 }}>
+          <SectionBlock tint={false}>
+            <SectionTitle>Contact</SectionTitle>
+            <Stack spacing={1.2}>
+              <Stack direction="row" spacing={1.5} alignItems="center"><Email sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Email</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>luciarasoanirina8@gmail.com</Typography></Box></Stack>
+              <Stack direction="row" spacing={1.5} alignItems="center"><Phone sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Telephone</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>+261 38 702 36</Typography></Box></Stack>
+              <Stack direction="row" spacing={1.5} alignItems="center"><LocationOn sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Localisation</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Fianarantsoa, Madagascar</Typography></Box></Stack>
+            </Stack>
+          </SectionBlock>
+
+          <SectionBlock>
+            <SectionTitle>Disponibilite</SectionTitle>
+            <Box sx={{ display: "inline-block", bgcolor: "rgba(34,197,94,0.1)", color: "#22c55e", px: 2, py: 0.6, borderRadius: 30, fontWeight: 600, fontSize: { xs: "0.66rem", sm: "0.72rem" } }}>Disponible pour mission</Box>
+          </SectionBlock>
+        </Box>
+      </Box>
+    </Box>,
+
+    // Page 3 - Dos du livre (À propos + code-barres bas-gauche, façon dos du modèle)
     <Box
       key="back"
       sx={{
@@ -455,10 +437,11 @@ export default function CvLivre({ onClose }: CvLivreProps) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: { xs: 1.5, md: 2 },
+        gap: { xs: 1.2, md: 1.6 },
         height: "100%",
         minHeight: { xs: "70vh", md: "80vh" },
         p: { xs: 3, md: 4 },
+        pb: { xs: 5, md: 6 },
         textAlign: "center",
         bgcolor: "#ffffff",
         position: "relative",
@@ -486,6 +469,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               key={i}
               href={s.href}
               target="_blank"
+              rel="noopener noreferrer"
               sx={{ color: "#0050FF", bgcolor: "rgba(0,80,255,0.08)", "&:hover": { bgcolor: "#0050FF", color: "#fff", transform: "translateY(-3px)" }, transition: "all 0.3s" }}
             >
               {s.icon}
@@ -493,11 +477,11 @@ export default function CvLivre({ onClose }: CvLivreProps) {
           ))}
         </Stack>
 
-        <Box sx={{ textAlign: "left", border: "1px solid rgba(0,80,255,0.12)", borderRadius: 2, p: { xs: 1.5, md: 2 }, mb: 2, bgcolor: "#fafbff" }}>
+        <Box sx={{ textAlign: "left", border: "1px solid rgba(0,80,255,0.12)", borderRadius: 2, p: { xs: 1.4, md: 1.8 }, mb: 2, bgcolor: "#fafbff" }}>
           <Typography sx={{ fontSize: "0.62rem", fontWeight: 700, color: "#0050FF", letterSpacing: 2, mb: 1, textAlign: "center" }}>
             À PROPOS
           </Typography>
-          <Typography sx={{ fontSize: { xs: "0.68rem", md: "0.75rem" }, color: "#444", lineHeight: 1.7, textAlign: "center" }}>
+          <Typography sx={{ fontSize: { xs: "0.66rem", md: "0.73rem" }, color: "#444", lineHeight: 1.65, textAlign: "center" }}>
             Developpeuse Full-Stack basee a Fianarantsoa, Madagascar, actuellement en 3eme annee de Licence a l'EMIT. Disponible pour des missions freelance ou des collaborations.
           </Typography>
         </Box>
@@ -505,18 +489,18 @@ export default function CvLivre({ onClose }: CvLivreProps) {
         <Stack spacing={0.5} sx={{ mb: 2 }}>
           <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
             <Email sx={{ color: "#0050FF", fontSize: 18 }} />
-            <Typography sx={{ fontSize: { xs: "0.72rem", md: "0.8rem" }, color: "#333" }}>luciarasoanirina8@gmail.com</Typography>
+            <Typography sx={{ fontSize: { xs: "0.7rem", md: "0.78rem" }, color: "#333" }}>luciarasoanirina8@gmail.com</Typography>
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
             <Phone sx={{ color: "#0050FF", fontSize: 18 }} />
-            <Typography sx={{ fontSize: { xs: "0.72rem", md: "0.8rem" }, color: "#333" }}>+261 38 702 36</Typography>
+            <Typography sx={{ fontSize: { xs: "0.7rem", md: "0.78rem" }, color: "#333" }}>+261 38 702 36</Typography>
           </Stack>
         </Stack>
 
         <Box
           sx={{
             display: "inline-flex",
-            p: 1.5,
+            p: 1.2,
             bgcolor: "#fff",
             borderRadius: 3,
             border: "2px solid rgba(0,80,255,0.15)",
@@ -524,63 +508,54 @@ export default function CvLivre({ onClose }: CvLivreProps) {
           }}
         >
           {qrUrl ? (
-            <Box component="img" src={qrUrl} alt="QR code CV" sx={{ width: { xs: 118, md: 144 }, height: { xs: 118, md: 144 }, display: "block" }} />
+            <Box component="img" src={qrUrl} alt="QR code CV" sx={{ width: { xs: 104, md: 128 }, height: { xs: 104, md: 128 }, display: "block" }} />
           ) : (
-            <Box sx={{ width: { xs: 118, md: 144 }, height: { xs: 118, md: 144 } }} />
+            <Box sx={{ width: { xs: 104, md: 128 }, height: { xs: 104, md: 128 } }} />
           )}
         </Box>
-        <Typography sx={{ mt: 1, fontSize: "0.66rem", color: "#888", letterSpacing: 0.5 }}>
+        <Typography sx={{ mt: 1, mb: 2, fontSize: "0.64rem", color: "#888", letterSpacing: 0.5 }}>
           Scannez pour télécharger mon CV
         </Typography>
 
-        {/* BOUTON DE TELECHARGEMENT - Avec z-index élevé pour être cliquable */}
-        <Box
+        {/*
+          BOUTON DE TELECHARGEMENT
+          Corrigé : c'est un vrai lien <a download> rendu directement dans le
+          DOM (via component="a" de MUI Button), pas un clic JS déclenché sur
+          une ancre créée/détruite à la volée. C'est le navigateur qui gère
+          nativement le téléchargement — plus fiable sur mobile/Safari.
+          Le stopPropagation évite juste qu'un clic ne remonte vers les zones
+          de navigation (flèches page précédente/suivante) qui l'entourent.
+        */}
+        <Button
+          component="a"
+          href={CV_FILE_URL}
+          download="CV_Lucia_Rasoanirina.pdf"
+          variant="contained"
+          startIcon={<Download />}
+          onClick={(e) => e.stopPropagation()}
           sx={{
-            mt: 2.5,
+            bgcolor: "#0050FF",
+            borderRadius: 30,
+            px: 4,
+            py: 1.2,
+            fontWeight: 700,
+            textTransform: "none",
+            boxShadow: "0 10px 24px rgba(0,80,255,0.3)",
             position: "relative",
-            zIndex: 100,
-            pointerEvents: "auto",
+            zIndex: 20,
+            "&:hover": {
+              bgcolor: "#003bb5",
+            },
+            transition: "background-color 0.3s",
           }}
         >
-          <Button
-            type="button"
-            variant="contained"
-            startIcon={<Download />}
-            onClick={handleDownloadPDF}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.04)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-            sx={{
-              bgcolor: "#0050FF",
-              borderRadius: 30,
-              px: 4,
-              py: 1.2,
-              fontWeight: 700,
-              textTransform: "none",
-              cursor: "pointer",
-              boxShadow: "0 10px 24px rgba(0,80,255,0.3)",
-              "&:hover": {
-                bgcolor: "#003bb5",
-                transform: "scale(1.04)",
-              },
-              "&:active": {
-                transform: "scale(0.96)",
-              },
-              transition: "all 0.3s",
-              pointerEvents: "auto",
-              position: "relative",
-              zIndex: 101,
-            }}
-          >
-            Télécharger le CV
-          </Button>
-        </Box>
+          Télécharger le CV
+        </Button>
+      </Box>
 
-        {/* Bande "code-barres" décorative façon dos de livre du modèle 1 */}
-        <BarcodeStripe />
+      {/* Code-barres décoratif calé en bas à gauche, comme sur le dos du modèle */}
+      <Box sx={{ position: "absolute", left: { xs: 16, md: 28 }, bottom: { xs: 14, md: 20 } }}>
+        <BarcodeBlock />
       </Box>
     </Box>,
   ];
@@ -604,7 +579,6 @@ export default function CvLivre({ onClose }: CvLivreProps) {
         alignItems: "center",
         justifyContent: "center",
         p: { xs: 1, sm: 2, md: 3 },
-        perspective: "2600px",
         animation: "cvFadeIn 0.4s ease",
       }}
     >
@@ -615,30 +589,31 @@ export default function CvLivre({ onClose }: CvLivreProps) {
           height: { xs: "86vh", md: "85vh" },
           maxHeight: "92vh",
           position: "relative",
-          transformStyle: "preserve-3d",
-          animation: "cvBookIn 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2)",
+          animation: "cvBookIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1)",
         }}
       >
         <Box sx={{ position: "absolute", top: -10, right: -10, zIndex: 30, bgcolor: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", borderRadius: "50%", p: 0.5, "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}>
           <IconButton onClick={onClose} sx={{ color: "#fff", "&:hover": { transform: "rotate(90deg)" }, transition: "transform 0.3s ease" }}><Close /></IconButton>
         </Box>
 
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            position: "relative",
-            transformStyle: "preserve-3d",
-            transform: { md: "rotateX(6deg)" },
-            transition: "transform 0.6s ease",
-          }}
-        >
-          <Box sx={{ position: "absolute", inset: 0, borderRadius: { xs: 2, md: 3 }, transform: "translateZ(-26px)", bgcolor: "#e8e2da", boxShadow: "0 40px 90px rgba(0,0,0,0.65)" }} />
-          {[22, 18, 14, 10, 6].map((z, i) => (
-            <Box key={z} sx={{ position: "absolute", top: i + 1, bottom: i + 1, right: -3 - i, width: 8, borderRadius: 1, transform: `translateZ(-${z}px)`, bgcolor: i % 2 ? "#fbf9f6" : "#eef0f3", display: { xs: "none", md: "block" } }} />
+        {/*
+          NOTE IMPORTANTE : l'ancien conteneur appliquait en permanence un
+          `transform: rotateX(6deg)` (perspective 3D) sur toute cette zone,
+          y compris au repos (pas seulement pendant l'animation d'ouverture).
+          Résultat : au repos, la position "cliquable" réelle des éléments
+          (calculée à plat) ne correspondait plus à leur position "affichée"
+          (déformée en 3D) — c'est ce qui rendait le bouton Télécharger (et
+          d'autres éléments en bas de page) injoignables au clic. La bascule
+          3D permanente est supprimée ci-dessous ; seule l'animation de
+          tourne-page (transitoire) utilise encore une rotation 3D locale.
+        */}
+        <Box sx={{ width: "100%", height: "100%", position: "relative" }}>
+          <Box sx={{ position: "absolute", inset: 0, borderRadius: { xs: 2, md: 3 }, bgcolor: "#e8e2da", transform: "translate(3px, 4px)", boxShadow: "0 40px 90px rgba(0,0,0,0.5)", zIndex: 0 }} />
+          {[16, 12, 8, 4].map((offset, i) => (
+            <Box key={offset} sx={{ position: "absolute", top: i + 1, bottom: i + 1, right: -3 - i, width: 8, borderRadius: 1, bgcolor: i % 2 ? "#fbf9f6" : "#eef0f3", display: { xs: "none", md: "block" }, zIndex: 0 }} />
           ))}
 
-          {/* Tranche du livre, toujours visible (cf. modèle avec dos illustré) */}
+          {/* Tranche du livre, toujours visible (cf. modèle) */}
           <BookSpine />
 
           <Box
@@ -649,6 +624,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               borderRadius: { xs: 2, md: 3 },
               overflow: "hidden",
               boxShadow: "0 30px 80px rgba(0,0,0,0.5)",
+              zIndex: 1,
             }}
           >
             <PageScroller>{pages[basePage]}</PageScroller>
@@ -662,7 +638,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               title="Page précédente"
               sx={{
                 position: "absolute", top: 0, bottom: 0, left: 0,
-                width: { xs: "15%", md: "12%" },
+                width: { xs: "12%", md: "10%" },
                 zIndex: 9, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "flex-start", pl: 1,
                 color: "rgba(0,80,255,0)",
@@ -679,7 +655,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               title="Page suivante"
               sx={{
                 position: "absolute", top: 0, bottom: 0, right: 0,
-                width: { xs: "15%", md: "12%" },
+                width: { xs: "12%", md: "10%" },
                 zIndex: 9, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "flex-end", pr: 1,
                 color: "rgba(0,80,255,0)",
@@ -699,6 +675,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
                 transformStyle: "preserve-3d",
                 transformOrigin: "left center",
                 zIndex: 12,
+                perspective: "2200px",
                 animation: `${flip.dir === "next" ? "cvFlipNext" : "cvFlipPrev"} ${FLIP_MS}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
                 "&::after": {
                   content: '""',
@@ -737,7 +714,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
 
       <style>{`
         @keyframes cvFadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes cvBookIn { from { opacity: 0; transform: translateY(40px) rotateX(25deg) scale(0.9); } to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); } }
+        @keyframes cvBookIn { from { opacity: 0; transform: translateY(30px) scale(0.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes cvFlipNext { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
         @keyframes cvFlipPrev { from { transform: rotateY(-180deg); } to { transform: rotateY(0deg); } }
         @keyframes cvFlipShade { 0% { opacity: 0; } 45% { opacity: 1; } 100% { opacity: 0; } }
