@@ -148,6 +148,36 @@ const hasSpecialChars = (str: string) => {
   return specialCharsRegex.test(str);
 };
 
+// Retour haptique léger (no-op silencieux si l'appareil/navigateur ne le supporte pas)
+const vibrate = (pattern: number | number[] = 15) => {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      /* ignore */
+    }
+  }
+};
+
+// Détection d'orientation (portrait/paysage), utilisée pour adapter certaines mises en page mobiles
+function useOrientation() {
+  const getOrientation = () =>
+    typeof window !== "undefined" && window.matchMedia("(orientation: portrait)").matches ? "portrait" : "landscape";
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">(getOrientation());
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(orientation: portrait)");
+    const handler = () => setOrientation(getOrientation());
+    if (mq.addEventListener) mq.addEventListener("change", handler);
+    else mq.addListener(handler);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", handler);
+      else mq.removeListener(handler);
+    };
+  }, []);
+  return orientation;
+}
+
 /* ============================================================
    NOUVEAUX COMPOSANTS UTILITAIRES — Animations & UX
    ============================================================ */
@@ -564,8 +594,31 @@ function SkillCard({ skill, openSkillDetail, setOpenSkillDetail, moreLabel, less
 }
 
 function ImageModal({ open, images, currentIndex, onClose, onNext, onPrev }: ImageModalProps) {
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
   if (!open || !images.length) return null;
   const currentImage = images[currentIndex];
+
+  // Swipe tactile : glisser à gauche/droite pour naviguer entre les images
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && currentIndex < images.length - 1) {
+        vibrate(10);
+        onNext();
+      } else if (dx > 0 && currentIndex > 0) {
+        vibrate(10);
+        onPrev();
+      }
+    }
+  };
+
   return (
     <Modal open={open} onClose={onClose} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Zoom in={open} timeout={300}>
@@ -579,8 +632,11 @@ function ImageModal({ open, images, currentIndex, onClose, onNext, onPrev }: Ima
             overflow: "hidden",
             boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
             outline: "none",
+            touchAction: "pan-y",
           }}
           onClick={(e) => e.stopPropagation()}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           <img
             src={currentImage}
@@ -631,13 +687,157 @@ function ImageModal({ open, images, currentIndex, onClose, onNext, onPrev }: Ima
   );
 }
 
-function ScrollToTop() {
+function ScrollToTop({ bottomOffset = 24 }: { bottomOffset?: number }) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 300 });
   const handleClick = () => window.scrollTo({ top: 0, behavior: "smooth" });
   return (
     <Slide direction="up" in={trigger}>
-      <IconButton onClick={handleClick} sx={{ position: "fixed", bottom: 24, right: 24, bgcolor: "#0050FF", color: "white", zIndex: 1000, transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", transform: trigger ? "scale(1)" : "scale(0)", "&:hover": { bgcolor: "#003bb5", transform: "scale(1.1) rotate(360deg)", boxShadow: "0 0 15px rgba(0,80,255,0.6)" } }}><KeyboardArrowUp /></IconButton>
+      <IconButton onClick={handleClick} sx={{ position: "fixed", bottom: bottomOffset, right: 24, bgcolor: "#0050FF", color: "white", zIndex: 1000, transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", transform: trigger ? "scale(1)" : "scale(0)", "&:hover": { bgcolor: "#003bb5", transform: "scale(1.1) rotate(360deg)", boxShadow: "0 0 15px rgba(0,80,255,0.6)" } }}><KeyboardArrowUp /></IconButton>
     </Slide>
+  );
+}
+
+// Indicateur "pull to refresh" (mobile) — glisser vers le bas en haut de page pour rafraîchir
+function PullToRefresh({ onRefresh }: { onRefresh: () => void }) {
+  const [distance, setDistance] = useState(0);
+  const [pulling, setPulling] = useState(false);
+  const startY = useRef(0);
+  const active = useRef(false);
+  const THRESHOLD = 70;
+
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      if (window.scrollY <= 0) {
+        startY.current = e.touches[0].clientY;
+        active.current = true;
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!active.current) return;
+      const delta = e.touches[0].clientY - startY.current;
+      if (delta > 0 && window.scrollY <= 0) {
+        setPulling(true);
+        setDistance(Math.min(delta * 0.5, 90));
+      } else {
+        active.current = false;
+        setPulling(false);
+        setDistance(0);
+      }
+    };
+    const onTouchEnd = () => {
+      setDistance((current) => {
+        if (active.current && current > THRESHOLD) {
+          vibrate(20);
+          onRefresh();
+        }
+        return 0;
+      });
+      active.current = false;
+      setPulling(false);
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd);
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [onRefresh]);
+
+  return (
+    <Box
+      sx={{
+        position: "fixed",
+        top: HEADER_HEIGHT,
+        left: 0,
+        right: 0,
+        display: { xs: "flex", md: "none" },
+        justifyContent: "center",
+        alignItems: "center",
+        height: distance,
+        overflow: "hidden",
+        transition: pulling ? "none" : "height 0.25s ease",
+        zIndex: 98,
+        pointerEvents: "none",
+      }}
+    >
+      {distance > 8 && (
+        <CircularProgress
+          size={22}
+          thickness={5}
+          variant={distance > THRESHOLD ? "indeterminate" : "determinate"}
+          value={Math.min((distance / THRESHOLD) * 100, 100)}
+          sx={{ color: "#0050FF", opacity: Math.min(distance / THRESHOLD, 1) }}
+        />
+      )}
+    </Box>
+  );
+}
+
+// Barre de navigation basse (mobile) — équivalent d'une bottom nav d'app native
+function BottomNav({
+  items,
+  activeSection,
+  onSelect,
+}: {
+  items: readonly { id: string; label: string; icon: React.JSX.Element }[];
+  activeSection: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <Box
+      component="nav"
+      sx={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 200,
+        display: { xs: "flex", md: "none" },
+        justifyContent: "space-around",
+        alignItems: "center",
+        bgcolor: "rgba(255,255,255,0.97)",
+        backdropFilter: "blur(14px)",
+        borderTop: "1px solid rgba(0,80,255,0.15)",
+        boxShadow: "0 -6px 20px rgba(0,0,0,0.06)",
+        pb: "env(safe-area-inset-bottom)",
+        pt: 0.5,
+      }}
+    >
+      {items.map((item) => {
+        const active = activeSection === item.id;
+        return (
+          <Box
+            key={item.id}
+            onClick={() => {
+              vibrate(12);
+              onSelect(item.id);
+            }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 0.3,
+              py: 0.8,
+              px: 1,
+              flex: 1,
+              color: active ? "#0050FF" : "#888",
+              transition: "color 0.2s ease, transform 0.2s ease",
+              transform: active ? "translateY(-2px)" : "none",
+              touchAction: "manipulation",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <Box sx={{ fontSize: 20, display: "flex" }}>{item.icon}</Box>
+            <Typography sx={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: 0.3 }}>{item.label}</Typography>
+            {active && <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#0050FF" }} />}
+          </Box>
+        );
+      })}
+    </Box>
   );
 }
 
@@ -682,8 +882,8 @@ export default function Accueil() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Filtre de tags projets
-  const [activeTag, setActiveTag] = useState<string>("Tous");
+  // Filtre de projets — par catégorie (Website, Web App, Mobile App, ...), plus par tech
+  const [activeCategory, setActiveCategory] = useState<string>("Tous");
   // Filtre de catégorie compétences
   const [activeSkillCategory, setActiveSkillCategory] = useState<string>("Toutes");
 
@@ -778,6 +978,36 @@ export default function Accueil() {
   ] as const;
 
   const fullText = t.about;
+
+  // Swipe horizontal (mobile) pour naviguer entre les sections du menu.
+  // Ne se déclenche que si le geste est nettement horizontal, pour ne jamais
+  // interférer avec le scroll vertical normal de la page.
+  const touchNavRef = useRef<{ x: number; y: number } | null>(null);
+  const handleSectionTouchStart = (e: React.TouchEvent) => {
+    touchNavRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const handleSectionTouchEnd = (e: React.TouchEvent) => {
+    if (!touchNavRef.current) return;
+    const dx = e.changedTouches[0].clientX - touchNavRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchNavRef.current.y;
+    touchNavRef.current = null;
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.8) {
+      const idx = menuItems.findIndex((m) => m.id === activeSection);
+      if (dx < 0 && idx < menuItems.length - 1) {
+        vibrate(15);
+        scrollToSection(menuItems[idx + 1].id);
+      } else if (dx > 0 && idx > 0) {
+        vibrate(15);
+        scrollToSection(menuItems[idx - 1].id);
+      }
+    }
+  };
+
+  const orientation = useOrientation();
+
+  const handlePullRefresh = () => {
+    window.location.reload();
+  };
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -1027,12 +1257,12 @@ export default function Accueil() {
     "Specialized Development": <Map sx={{ color: "#0050FF" }} />,
   };
 
-  const allTags = useMemo(() => {
+  const allCategories = useMemo(() => {
     const set = new Set<string>();
-    projects.forEach((p) => p.tags.forEach((tg) => set.add(tg)));
+    projects.forEach((p) => set.add(p.category));
     return ["Tous", ...Array.from(set)];
   }, []);
-  const filteredProjects = activeTag === "Tous" ? projects : projects.filter((p) => p.tags.includes(activeTag));
+  const filteredProjects = activeCategory === "Tous" ? projects : projects.filter((p) => p.category === activeCategory);
 
   const starsRef = useRef(
     [...Array(36)].map(() => ({
@@ -1128,7 +1358,7 @@ export default function Accueil() {
             ))}
           </Stack>
 
-          <IconButton sx={{ display: { xs: "flex", md: "none" }, p: 1, borderRadius: 2, transition: "all 0.3s ease", "&:hover": { bgcolor: "rgba(0,80,255,0.08)" } }} onClick={() => setOpenMenu(true)} size="small">
+          <IconButton sx={{ display: { xs: "flex", md: "none" }, p: 1, borderRadius: 2, transition: "all 0.3s ease", touchAction: "manipulation", "&:hover": { bgcolor: "rgba(0,80,255,0.08)" } }} onClick={() => { vibrate(12); setOpenMenu(true); }} size="small">
             <Menu sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </Container>
@@ -1171,12 +1401,28 @@ export default function Accueil() {
         </List>
       </Drawer>
 
-      <Box minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`} pt={`${HEADER_HEIGHT}px`} display="flex" alignItems="center" position="relative">
+      <Box
+        minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}
+        pt={`${HEADER_HEIGHT}px`}
+        pb={{ xs: "64px", md: 0 }}
+        display="flex"
+        alignItems="center"
+        position="relative"
+        onTouchStart={handleSectionTouchStart}
+        onTouchEnd={handleSectionTouchEnd}
+      >
         <Box sx={{ position: "absolute", left: 0, top: 0, width: { md: "45%", lg: "40%" }, height: "100%", bgcolor: "#E6DED5", zIndex: 0, display: { xs: "none", md: "block" }, borderRadius: "0 60px 60px 0", opacity: 0.7 }} />
         <Container maxWidth={false} sx={{ position: "relative", zIndex: 1, px: { xs: 2, sm: 3, md: 4, lg: 6 } }}>
 
           {/* ABOUT */}
-          <Stack id="about" direction={{ xs: "column", md: "row" }} spacing={{ xs: 6, md: 12 }} alignItems="center" minHeight={`calc(100vh - ${HEADER_HEIGHT}px)`}>
+          <Stack
+            id="about"
+            direction={{ xs: "column", md: "row" }}
+            spacing={{ xs: 6, md: 12 }}
+            alignItems="center"
+            minHeight={isMobile && orientation === "landscape" ? "auto" : `calc(100vh - ${HEADER_HEIGHT}px)`}
+            py={isMobile && orientation === "landscape" ? 6 : 0}
+          >
             <Zoom in={true} timeout={800}>
               <Box className="profile-card" sx={{ position: "relative", width: { xs: "100%", sm: 450 }, bgcolor: "rgba(244,240,237,0.7)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.6)", boxShadow: "20px 20px 40px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.7)", textAlign: "center", pb: 2, borderRadius: "32px", transition: "all 0.4s", transformStyle: "preserve-3d", "&:hover": { transform: "translateY(-12px) rotateX(3deg) rotateY(3deg)", boxShadow: "30px 30px 50px rgba(0,0,0,0.15)" } }}>
                 <Box sx={{ position: "absolute", top: 20, right: 20, display: "flex", alignItems: "center", gap: 1.5, zIndex: 2 }}>
@@ -1206,7 +1452,7 @@ export default function Accueil() {
                         }}
                       />
                     ))}
-                    <Avatar src="/photo-lucia.jpg" sx={{ width: { xs: 160, sm: 220 }, height: { xs: 160, sm: 220 }, border: "4px solid #fff", boxShadow: "0 20px 30px rgba(0,0,0,0.2)", position: "relative", zIndex: 2, transition: "transform 0.5s", "&:hover": { transform: "scale(1.03) rotate(-2deg)" } }} />
+                    <Avatar src="/photo-lucia.jpg" imgProps={{ loading: "lazy", decoding: "async" }} sx={{ width: { xs: 160, sm: 220 }, height: { xs: 160, sm: 220 }, border: "4px solid #fff", boxShadow: "0 20px 30px rgba(0,0,0,0.2)", position: "relative", zIndex: 2, transition: "transform 0.5s", "&:hover": { transform: "scale(1.03) rotate(-2deg)" } }} />
                     <Box className="badge" sx={{ position: "absolute", bottom: 10, right: -5, width: 52, height: 28, bgcolor: "#0050FF", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_MONO, color: "#fff", fontWeight: 800, fontSize: 12, boxShadow: "0 8px 18px rgba(0,80,255,0.45)", transformStyle: "preserve-3d", animation: "badge3d 3.6s ease-in-out infinite", zIndex: 3 }}>{"< />"}</Box>
                   </Box>
                   <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mt: 3, color: "#000" }}>Lucia Rasoanirina</Typography>
@@ -1231,7 +1477,7 @@ export default function Accueil() {
               <Box flex={1} textAlign={{ xs: "center", md: "left" }}>
                 <Fade in timeout={800}>
                   <Stack direction="row" alignItems="center" spacing={2} mb={2} justifyContent={{ xs: "center", md: "flex-start" }}>
-                    <Typography variant="h1" fontFamily={FONT_HEADING} sx={{ fontSize: { xs: 60, sm: 80, md: 100 }, fontWeight: 800, lineHeight: 1, background: "linear-gradient(135deg, #000 0%, #0050FF 60%, #00bfff 100%)", backgroundSize: "200% auto", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent", animation: "gradientShift 5s ease infinite" }}>{t.hello}</Typography>
+                    <Typography variant="h1" fontFamily={FONT_HEADING} sx={{ fontSize: "clamp(2.6rem, 9vw, 6.25rem)", fontWeight: 800, lineHeight: 1, background: "linear-gradient(135deg, #000 0%, #0050FF 60%, #00bfff 100%)", backgroundSize: "200% auto", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent", animation: "gradientShift 5s ease infinite" }}>{t.hello}</Typography>
                     <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{ width: { xs: 24, sm: 34 }, height: { xs: 24, sm: 34 }, borderLeft: "5px solid #0050FF", transform: "rotate(45deg)", animation: "spinSlow 6s linear infinite" }} /><Typography sx={{ fontSize: { xs: 35, sm: 45, md: 60 }, fontWeight: 700, color: "#0050FF" }}>*</Typography></Stack>
                   </Stack>
                 </Fade>
@@ -1270,7 +1516,7 @@ export default function Accueil() {
           {/* KNOWLEDGE */}
           <Box id="connaissances" sx={{ mt: 12, mb: 10 }}>
             <Reveal3D>
-              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 2, textAlign: "center", color: "#000" }}>
+              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 2, textAlign: "center", color: "#000", fontSize: "clamp(1.5rem, 4vw, 2.125rem)" }}>
                 <School sx={{ verticalAlign: "middle", mr: 1, color: "#0050FF", fontSize: 36 }} />
                 {t.knowledgeTitle}
               </Typography>
@@ -1393,7 +1639,7 @@ export default function Accueil() {
           {/* SKILLS */}
           <Box id="competences" sx={{ mt: 8, mb: 10 }}>
             <Reveal3D>
-              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 2, textAlign: "center", color: "#000" }}>
+              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 2, textAlign: "center", color: "#000", fontSize: "clamp(1.5rem, 4vw, 2.125rem)" }}>
                 <Code sx={{ verticalAlign: "middle", mr: 1, color: "#0050FF", fontSize: 36 }} />
                 {t.skillsTitle}
               </Typography>
@@ -1448,26 +1694,30 @@ export default function Accueil() {
           {/* PROJECTS */}
           <Box id="projects" sx={{ mt: 8, mb: 10 }}>
             <Reveal3D>
-              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 3, textAlign: "center", color: "#000" }}>
+              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 3, textAlign: "center", color: "#000", fontSize: "clamp(1.5rem, 4vw, 2.125rem)" }}>
                 <WorkOutline sx={{ verticalAlign: "middle", mr: 1, color: "#0050FF", fontSize: 36 }} />
                 {t.projectsTitle}
               </Typography>
             </Reveal3D>
 
-            {/* Filtre par tags */}
+            {/* Filtre par catégorie (Website, Web App, Mobile App, ...) */}
             <Stack direction="row" spacing={1.2} flexWrap="wrap" justifyContent="center" sx={{ mb: 5, gap: 1 }}>
-              {allTags.map((tag) => (
+              {allCategories.map((cat) => (
                 <Chip
-                  key={tag}
-                  label={tag}
-                  onClick={() => setActiveTag(tag)}
+                  key={cat}
+                  label={cat}
+                  onClick={() => {
+                    vibrate(10);
+                    setActiveCategory(cat);
+                  }}
                   sx={{
                     fontWeight: 600,
                     fontFamily: FONT_MONO,
-                    bgcolor: activeTag === tag ? "#0050FF" : "rgba(0,80,255,0.08)",
-                    color: activeTag === tag ? "#fff" : "#0050FF",
+                    bgcolor: activeCategory === cat ? "#0050FF" : "rgba(0,80,255,0.08)",
+                    color: activeCategory === cat ? "#fff" : "#0050FF",
                     transition: "all 0.25s cubic-bezier(0.2,0.9,0.4,1.1)",
-                    "&:hover": { bgcolor: activeTag === tag ? "#003bb5" : "rgba(0,80,255,0.18)" },
+                    touchAction: "manipulation",
+                    "&:hover": { bgcolor: activeCategory === cat ? "#003bb5" : "rgba(0,80,255,0.18)" },
                   }}
                 />
               ))}
@@ -1482,7 +1732,10 @@ export default function Accueil() {
                   <Zoom in={true} timeout={500} style={{ transitionDelay: `${idx * 120}ms` }} key={project.title}>
                     <Box sx={{ width: { xs: "100%", sm: "calc(50% - 32px)", md: "calc(33.333% - 32px)" }, minWidth: { xs: "100%", sm: "320px" }, flexGrow: 0 }}>
                       <GlowCard>
-                        <Card sx={{ bgcolor: "#F4F0ED", borderRadius: 5, transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)", height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", transformStyle: "preserve-3d", "&:hover": { transform: "translateY(-12px) rotateX(2deg) rotateY(2deg)", boxShadow: "0 25px 40px rgba(0,0,0,0.2)", "& .project-media": { transform: "scale(1.08)" } } }}>
+                        <Card
+                          className="project-card"
+                          sx={{ bgcolor: "#F4F0ED", borderRadius: 5, transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)", height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", transformStyle: "preserve-3d", containerType: "inline-size", containerName: "project-card", "&:hover": { transform: "translateY(-12px) rotateX(2deg) rotateY(2deg)", boxShadow: "0 25px 40px rgba(0,0,0,0.2)", "& .project-media": { transform: "scale(1.08)" } } }}
+                        >
                           <Box sx={{ position: "relative", height: 200, overflow: "hidden", bgcolor: isMobileApp ? "#0a0a2e" : "transparent" }}>
                             {isMobileApp && (
                               <Box aria-hidden sx={{ position: "absolute", inset: 0, backgroundImage: `url(${project.images[0]})`, backgroundSize: "cover", backgroundPosition: "center", filter: "blur(20px) brightness(0.5)", transform: "scale(1.25)" }} />
@@ -1491,6 +1744,8 @@ export default function Accueil() {
                               component="img"
                               image={project.images[0]}
                               className="project-media"
+                              loading="lazy"
+                              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                               onClick={() => openProjectModal(project.images, 0)}
                               onError={(e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.src = PLACEHOLDER_IMG; }}
                               sx={{ position: "relative", height: "100%", width: "100%", objectFit: isMobileApp ? "contain" : "cover", py: isMobileApp ? 1 : 0, transition: "transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)", cursor: "pointer" }}
@@ -1502,7 +1757,7 @@ export default function Accueil() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: "0.85rem" }}>{isProjectOpen ? project.description : shortDescription}</Typography>
                             <Stack direction="row" flexWrap="wrap" gap={0.8}>
                               {project.tags.slice(0, 3).map((tag) => (
-                                <Box key={tag} onClick={(e) => { e.stopPropagation(); setActiveTag(tag); scrollToSection("projects"); }} sx={{ bgcolor: "rgba(0,80,255,0.1)", px: 1.5, py: 0.5, borderRadius: 20, fontSize: 12, fontWeight: 600, color: "#0050FF", cursor: "pointer", transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { bgcolor: "#0050FF", color: "#fff", transform: "scale(1.05)" } }}>
+                                <Box key={tag} onClick={(e) => { e.stopPropagation(); vibrate(10); setActiveCategory(project.category); scrollToSection("projects"); }} title={`Voir les projets « ${project.category} »`} sx={{ bgcolor: "rgba(0,80,255,0.1)", px: 1.5, py: 0.5, borderRadius: 20, fontSize: 12, fontWeight: 600, color: "#0050FF", cursor: "pointer", transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { bgcolor: "#0050FF", color: "#fff", transform: "scale(1.05)" } }}>
                                   {tag}
                                 </Box>
                               ))}
@@ -1530,7 +1785,7 @@ export default function Accueil() {
           {/* CONTACT */}
           <Box id="contact" sx={{ mt: 6, mb: 10 }}>
             <Reveal3D>
-              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 4, textAlign: "center", color: "#000" }}>
+              <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 4, textAlign: "center", color: "#000", fontSize: "clamp(1.5rem, 4vw, 2.125rem)" }}>
                 <MailOutline sx={{ verticalAlign: "middle", mr: 1, color: "#0050FF", fontSize: 36 }} />
                 {t.contactTitle}
               </Typography>
@@ -1583,61 +1838,105 @@ export default function Accueil() {
       </Box>
 
       {/* Footer */}
-      <Box component="footer" sx={{ bgcolor: "#0a0a0a", color: "#fff", mt: 8, borderTop: "1px solid rgba(0,80,255,0.3)", position: "relative", overflow: "hidden" }}>
-        <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: "linear-gradient(90deg, #0050FF, #00bfff, #0050FF)", animation: "wave 2s infinite linear" }} />
-        <Container maxWidth="lg" sx={{ py: 5 }}>
-          <Grid container spacing={5} justifyContent="space-between">
+      <Box
+        component="footer"
+        sx={{
+          bgcolor: "#0a0a0a",
+          color: "#fff",
+          mt: { xs: 5, md: 8 },
+          pb: { xs: "72px", md: 0 }, // laisse la place à la bottom nav mobile fixe
+          borderTop: "1px solid rgba(0,80,255,0.3)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: "linear-gradient(90deg, #0050FF, #00bfff, #0050FF)", backgroundSize: "200% 100%", animation: "wave 2s infinite linear" }} />
+
+        <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 5 }, px: { xs: 2.5, sm: 3, md: 4 } }}>
+          <Grid container spacing={{ xs: 4, md: 5 }} justifyContent="space-between">
             <Grid size={{ xs: 12, md: 5 }}>
-              <Stack spacing={2.5}>
+              <Stack spacing={2.2} alignItems={{ xs: "center", md: "flex-start" }} textAlign={{ xs: "center", md: "left" }}>
                 <Stack direction="row" alignItems="center" spacing={2}>
-                  <Box sx={{ width: 48, height: 48, bgcolor: "#0050FF", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 22, color: "#fff", fontFamily: FONT_HEADING, boxShadow: "0 0 20px rgba(0,80,255,0.5)", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "scale(1.05) rotate(5deg)", boxShadow: "0 0 30px rgba(0,80,255,0.8)" } }}>LR</Box>
-                  <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ letterSpacing: 1, background: "linear-gradient(135deg, #fff 0%, #0050FF 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent" }}>Lucia Rasoanirina</Typography>
+                  <Box sx={{ width: { xs: 42, sm: 48 }, height: { xs: 42, sm: 48 }, bgcolor: "#0050FF", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: { xs: 18, sm: 22 }, color: "#fff", fontFamily: FONT_HEADING, boxShadow: "0 0 20px rgba(0,80,255,0.5)", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", flexShrink: 0, "&:hover": { transform: "scale(1.05) rotate(5deg)", boxShadow: "0 0 30px rgba(0,80,255,0.8)" } }}>LR</Box>
+                  <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ letterSpacing: 1, fontSize: { xs: "1.15rem", sm: "1.5rem" }, background: "linear-gradient(135deg, #fff 0%, #0050FF 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent" }}>Lucia Rasoanirina</Typography>
                 </Stack>
-                <Typography variant="body2" sx={{ color: "#ccc", lineHeight: 1.7, maxWidth: "90%" }}>{t.footerDesc}</Typography>
-                <Stack direction="row" spacing={2}>
-                  <IconButton size="medium" href="https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Facebook /></IconButton>
-                  <IconButton size="medium" href="https://www.linkedin.com/in/lucia-rasoanirina/" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><LinkedIn /></IconButton>
-                  <IconButton size="medium" href="https://www.instagram.com/rasoanirinambolatiana" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Instagram /></IconButton>
-                  <IconButton size="medium" href="https://github.com/Lucia-RASOANIRINA" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><GitHub /></IconButton>
+                <Typography variant="body2" sx={{ color: "#ccc", lineHeight: 1.7, maxWidth: { xs: "100%", md: "90%" }, fontSize: { xs: "0.82rem", sm: "0.875rem" } }}>{t.footerDesc}</Typography>
+                <Stack direction="row" spacing={{ xs: 1.2, sm: 2 }} flexWrap="wrap" justifyContent="center">
+                  <IconButton size="medium" href="https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Facebook /></IconButton>
+                  <IconButton size="medium" href="https://www.linkedin.com/in/lucia-rasoanirina/" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><LinkedIn /></IconButton>
+                  <IconButton size="medium" href="https://www.instagram.com/rasoanirinambolatiana" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Instagram /></IconButton>
+                  <IconButton size="medium" href="https://github.com/Lucia-RASOANIRINA" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><GitHub /></IconButton>
                 </Stack>
               </Stack>
             </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
-              <Stack direction="row" spacing={{ xs: 2, sm: 6, md: 8 }} justifyContent={{ xs: "space-between", sm: "flex-start", md: "flex-end" }} sx={{ flexWrap: "wrap", rowGap: 3, mt: { xs: 1, md: 0 } }}>
-                <Stack spacing={2}>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1 }}>{t.navigation}</Typography>
+              <Stack
+                direction="row"
+                spacing={{ xs: 3, sm: 6, md: 8 }}
+                justifyContent={{ xs: "center", sm: "center", md: "flex-end" }}
+                textAlign={{ xs: "center", md: "left" }}
+                sx={{ flexWrap: "wrap", rowGap: 3 }}
+              >
+                <Stack spacing={1.5} alignItems={{ xs: "center", md: "flex-start" }}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.navigation}</Typography>
                   {menuItems.slice(0, 2).map((item) => (
                     <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
-                      <Box sx={{ color: "#aaa", fontSize: 18, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{item.label}</Typography>
+                      <Box sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "flex" }, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.8rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }}
+                        onClick={() => scrollToSection(item.id)}
+                      >
+                        {item.label}
+                      </Typography>
                     </Stack>
                   ))}
                 </Stack>
-                <Stack spacing={2}>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1 }}>{t.explore}</Typography>
+                <Stack spacing={1.5} alignItems={{ xs: "center", md: "flex-start" }}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.explore}</Typography>
                   {menuItems.slice(2, 5).map((item) => (
                     <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
-                      <Box sx={{ color: "#aaa", fontSize: 18, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography variant="body2" sx={{ color: "#ccc", cursor: "pointer", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }} onClick={() => scrollToSection(item.id)}>{item.label}</Typography>
+                      <Box sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "flex" }, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.8rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }}
+                        onClick={() => scrollToSection(item.id)}
+                      >
+                        {item.label}
+                      </Typography>
                     </Stack>
                   ))}
                 </Stack>
               </Stack>
             </Grid>
           </Grid>
-          <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.1)", mt: 4, pt: 3, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
+
+          <Box
+            sx={{
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              mt: { xs: 3, sm: 4 },
+              pt: { xs: 2.5, sm: 3 },
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: { xs: 1.2, sm: 2 },
+              textAlign: "center",
+            }}
+          >
             <Stack direction="row" alignItems="center" spacing={1}>
               <Copyright sx={{ fontSize: 14, color: "#888" }} />
-              <Typography variant="body2" sx={{ color: "#888" }}>{t.rights}</Typography>
+              <Typography variant="body2" sx={{ color: "#888", fontSize: { xs: "0.72rem", sm: "0.875rem" } }}>{t.rights}</Typography>
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="body2" sx={{ color: "#888" }}>{t.madeIn}</Typography>
-            </Stack>
+            <Typography variant="body2" sx={{ color: "#888", fontSize: { xs: "0.72rem", sm: "0.875rem" } }}>{t.madeIn}</Typography>
           </Box>
         </Container>
       </Box>
 
-      <ScrollToTop />
+      <PullToRefresh onRefresh={handlePullRefresh} />
+      <BottomNav items={menuItems} activeSection={activeSection} onSelect={scrollToSection} />
+      <ScrollToTop bottomOffset={isMobile ? 76 : 24} />
       <ImageModal open={modalOpen} images={modalImages} currentIndex={modalCurrentIndex} onClose={() => setModalOpen(false)} onNext={handleNextImage} onPrev={handlePrevImage} />
 
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
@@ -1677,6 +1976,12 @@ export default function Accueil() {
           10% { opacity: 0.8; }
           90% { opacity: 0.8; }
           100% { transform: rotate(360deg) translateX(90px) rotate(-360deg); opacity: 0; }
+        }
+        /* Container queries : la carte projet adapte son titre à sa propre largeur,
+           pas à celle de l'écran — utile quand la même carte se retrouve dans une
+           grille à 1, 2 ou 3 colonnes. */
+        @container project-card (max-width: 260px) {
+          .project-card h6 { font-size: 1rem !important; }
         }
       `}</style>
     </Box>
