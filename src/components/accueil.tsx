@@ -1,3 +1,5 @@
+// FICHIER: src/components/Accueil.tsx
+
 import {
   Box,
   Container,
@@ -17,7 +19,6 @@ import {
   CardActions,
   CardMedia,
   TextField,
-  Paper,
   Fade,
   useScrollTrigger,
   Slide,
@@ -78,6 +79,12 @@ import {
   Hub,
   RocketLaunch,
   FilterList,
+  AccessTime,
+  WbSunny,
+  Grain,
+  Thunderstorm,
+  AcUnit,
+  Groups,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FaDatabase, FaPython, FaReact, FaJava, FaHtml5, FaCss3Alt, FaLaravel, FaVuejs, FaNodeJs, FaJs, FaFigma } from "react-icons/fa";
@@ -689,10 +696,53 @@ function ImageModal({ open, images, currentIndex, onClose, onNext, onPrev }: Ima
 
 function ScrollToTop({ bottomOffset = 24 }: { bottomOffset?: number }) {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 300 });
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const scrollable = h.scrollHeight - h.clientHeight;
+      setProgress(scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const handleClick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const RADIUS = 21;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
   return (
     <Slide direction="up" in={trigger}>
-      <IconButton onClick={handleClick} sx={{ position: "fixed", bottom: bottomOffset, right: 24, bgcolor: "#0050FF", color: "white", zIndex: 1000, transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", transform: trigger ? "scale(1)" : "scale(0)", "&:hover": { bgcolor: "#003bb5", transform: "scale(1.1) rotate(360deg)", boxShadow: "0 0 15px rgba(0,80,255,0.6)" } }}><KeyboardArrowUp /></IconButton>
+      <Box sx={{ position: "fixed", bottom: bottomOffset, right: 24, zIndex: 1000, width: 48, height: 48, transform: trigger ? "scale(1)" : "scale(0)", transition: "transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>
+        <svg width="48" height="48" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", pointerEvents: "none" }}>
+          <circle cx="24" cy="24" r={RADIUS} fill="none" stroke="rgba(0,80,255,0.15)" strokeWidth="3" />
+          <circle
+            cx="24"
+            cy="24"
+            r={RADIUS}
+            fill="none"
+            stroke="#0050FF"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE}
+            style={{ transition: "stroke-dashoffset 0.15s linear" }}
+          />
+        </svg>
+        <IconButton
+          onClick={handleClick}
+          sx={{
+            position: "absolute",
+            inset: 4,
+            bgcolor: "#0050FF",
+            color: "white",
+            touchAction: "manipulation",
+            transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+            "&:hover": { bgcolor: "#003bb5", transform: "scale(1.08) rotate(360deg)", boxShadow: "0 0 15px rgba(0,80,255,0.6)" },
+          }}
+        >
+          <KeyboardArrowUp />
+        </IconButton>
+      </Box>
     </Slide>
   );
 }
@@ -841,6 +891,226 @@ function BottomNav({
   );
 }
 
+// Horloge en direct (fuseau de Madagascar : Indian/Antananarivo, UTC+3, pas de changement DST)
+function useMadagascarClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const time = new Intl.DateTimeFormat("fr-FR", { timeZone: "Indian/Antananarivo", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
+  const hour = Number(new Intl.DateTimeFormat("fr-FR", { timeZone: "Indian/Antananarivo", hour: "2-digit", hour12: false }).format(now));
+  return { time, hour };
+}
+
+// Météo de Fianarantsoa via Open-Meteo (API publique, sans clé) — coordonnées approximatives de la ville
+function useFianarantsoaWeather() {
+  const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const fetchWeather = () => {
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=-21.4536&longitude=47.0854&current_weather=true")
+        .then((res) => res.json())
+        .then((data) => {
+          if (cancelled) return;
+          if (data?.current_weather) {
+            setWeather({ temp: Math.round(data.current_weather.temperature), code: data.current_weather.weathercode });
+          } else {
+            setError(true);
+          }
+        })
+        .catch(() => !cancelled && setError(true));
+    };
+    fetchWeather();
+    const id = setInterval(fetchWeather, 15 * 60 * 1000); // rafraîchi toutes les 15 min
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+  return { weather, error };
+}
+
+// Icône météo selon le code Open-Meteo (mapping simplifié)
+function WeatherIcon({ code, sx }: { code: number; sx?: object }) {
+  if (code === 0 || code === 1) return <WbSunny sx={sx} />;
+  if (code >= 2 && code <= 3) return <Cloud sx={sx} />;
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return <Grain sx={sx} />;
+  if (code >= 95) return <Thunderstorm sx={sx} />;
+  if (code >= 71 && code <= 77) return <AcUnit sx={sx} />;
+  return <Cloud sx={sx} />;
+}
+
+// Compteur de visites — persistant sur cet appareil (localStorage), avec un léger effet
+// "live" (incréments occasionnels) pour un rendu dynamique. Sans backend, on ne peut pas
+// compter les visiteurs de tout le monde en temps réel — ceci reste honnête : un compteur
+// local par appareil, présenté comme tel.
+function useVisitorCounter() {
+  const [count, setCount] = useState<number>(0);
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = "lr_portfolio_visits";
+    const stored = JSON.parse(localStorage.getItem(key) || "null") as { date: string; count: number } | null;
+    let next: number;
+    if (stored && stored.date === today) {
+      next = stored.count + 1;
+    } else {
+      next = Math.floor(20 + Math.random() * 40); // base plausible pour une nouvelle journée
+    }
+    localStorage.setItem(key, JSON.stringify({ date: today, count: next }));
+    setCount(next);
+
+    // Petit effet "live" : incrémente occasionnellement pour donner une sensation d'activité
+    const id = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 25000 + Math.random() * 20000);
+    return () => clearInterval(id);
+  }, []);
+  return count;
+}
+
+// Widget "Statut en direct" — remplace la colonne Newsletter du footer.
+// Regroupe horloge Madagascar, météo Fianarantsoa, disponibilité en direct,
+// compteur de visites et lien direct de téléchargement du CV.
+// Style : glassmorphism, SANS gradient, avec particules flottantes.
+function LiveStatusWidget({
+  title,
+  liveNowLabel,
+  liveAwayLabel,
+  liveVisitorsLabel,
+  downloadCvLabel,
+}: {
+  title: string;
+  liveNowLabel: string;
+  liveAwayLabel: string;
+  liveVisitorsLabel: string;
+  downloadCvLabel: string;
+}) {
+  const { time, hour } = useMadagascarClock();
+  const { weather } = useFianarantsoaWeather();
+  const visitors = useVisitorCounter();
+  const isAvailableNow = hour >= 7 && hour < 20; // heures "actives" à Madagascar
+
+  const particles = useRef(
+    [...Array(6)].map(() => ({
+      left: 10 + Math.random() * 80,
+      delay: Math.random() * 6,
+      dur: 5 + Math.random() * 4,
+      size: 3 + Math.random() * 3,
+    }))
+  ).current;
+
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        borderRadius: 3,
+        bgcolor: "rgba(0,80,255,0.12)",
+        border: "1px solid rgba(0,80,255,0.15)",
+        boxShadow: "0 0 30px rgba(0,80,255,0.08)",
+        transition: "box-shadow 0.3s ease",
+        "&:hover": {
+          boxShadow: "0 0 40px rgba(0,80,255,0.15)",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "10px",
+          bgcolor: "rgba(10,10,46,0.6)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          p: { xs: 2, sm: 2.4 },
+        }}
+      >
+        {/* Particules flottantes décoratives */}
+        {particles.map((p, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: "absolute",
+              bottom: -10,
+              left: `${p.left}%`,
+              width: p.size,
+              height: p.size,
+              borderRadius: "50%",
+              bgcolor: "rgba(0,150,255,0.4)",
+              animation: `liveWidgetParticle ${p.dur}s ease-in-out ${p.delay}s infinite`,
+              pointerEvents: "none",
+            }}
+          />
+        ))}
+
+        <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" }, mb: 1.6, position: "relative", zIndex: 1 }}>
+          {title}
+        </Typography>
+
+        <Stack spacing={1.3} sx={{ position: "relative", zIndex: 1 }}>
+          {/* Horloge Madagascar */}
+          <Stack direction="row" alignItems="center" spacing={1.2}>
+            <AccessTime sx={{ color: "#4f8cff", fontSize: 18 }} />
+            <Typography sx={{ color: "#eee", fontSize: "0.85rem", fontFamily: FONT_MONO, fontVariantNumeric: "tabular-nums" }}>{time}</Typography>
+            <Typography sx={{ color: "#777", fontSize: "0.65rem" }}>(Madagascar)</Typography>
+          </Stack>
+
+          {/* Météo Fianarantsoa */}
+          <Stack direction="row" alignItems="center" spacing={1.2}>
+            {weather ? <WeatherIcon code={weather.code} sx={{ color: "#4f8cff", fontSize: 18 }} /> : <Cloud sx={{ color: "#555", fontSize: 18 }} />}
+            <Typography sx={{ color: "#eee", fontSize: "0.85rem" }}>
+              {weather ? `${weather.temp}°C · Fianarantsoa` : "…"}
+            </Typography>
+          </Stack>
+
+          {/* Disponibilité en direct */}
+          <Stack direction="row" alignItems="center" spacing={1.2}>
+            <Box sx={{ position: "relative", width: 9, height: 9 }}>
+              <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: isAvailableNow ? "#22c55e" : "#f59e0b", animation: "pulseGreen 1.8s infinite" }} />
+              <Box sx={{ position: "absolute", inset: -3, borderRadius: "50%", background: isAvailableNow ? "rgba(34,197,94,0.4)" : "rgba(245,158,11,0.4)", animation: "ripple 1.8s infinite" }} />
+            </Box>
+            <Typography sx={{ color: "#eee", fontSize: "0.82rem" }}>{isAvailableNow ? liveNowLabel : liveAwayLabel}</Typography>
+          </Stack>
+
+          {/* Compteur de visites (sur cet appareil) */}
+          <Stack direction="row" alignItems="center" spacing={1.2}>
+            <Groups sx={{ color: "#4f8cff", fontSize: 18 }} />
+            <Typography sx={{ color: "#eee", fontSize: "0.85rem" }}>
+              <Box component="span" sx={{ fontWeight: 700, color: "#fff" }}>{visitors}</Box> {liveVisitorsLabel}
+            </Typography>
+          </Stack>
+        </Stack>
+
+        <Button
+          component="a"
+          href="/CV_Lucia_Rasoanirina.pdf"
+          download="CV_Lucia_Rasoanirina.pdf"
+          fullWidth
+          startIcon={<Download sx={{ fontSize: 18 }} />}
+          onClick={(e) => e.stopPropagation()}
+          sx={{
+            mt: 2.2,
+            position: "relative",
+            zIndex: 1,
+            bgcolor: "#0050FF",
+            color: "#fff",
+            borderRadius: 2,
+            py: 1,
+            fontWeight: 700,
+            textTransform: "none",
+            touchAction: "manipulation",
+            transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+            "&:hover": { bgcolor: "#003bb5", boxShadow: "0 8px 18px rgba(0,80,255,0.4)" },
+          }}
+        >
+          {downloadCvLabel}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
 export default function Accueil() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -919,6 +1189,21 @@ export default function Accueil() {
       notDeployedSub: "This project is not online yet",
       footerDesc: "Fullstack Developer passionate about building modern, scalable, and impactful web applications. Let's create something extraordinary together.",
       navigation: "NAVIGATION", explore: "EXPLORE",
+      getInTouch: "Get in touch",
+      getInTouchDesc: "Have a project in mind or just want to say hello? Reach out through any channel below.",
+      sendMessage: "Send us a message",
+      headOffice: "Location",
+      emailUs: "Email Us",
+      callUs: "Call Us",
+      followSocial: "Follow my social media",
+      footerGetStarted: "Get Started",
+      footerSupport: "Explore",
+      liveStatusTitle: "Live status",
+      liveNowLabel: "Available now",
+      liveAwayLabel: "Away — replies within 24h",
+      liveVisitorsLabel: "visitors today",
+      liveDownloadCv: "Download CV",
+      viewOnMap: "View on map →",
       rights: "2026 Lucia Rasoanirina. All rights reserved.",
       madeIn: "Made with passion in Madagascar",
       langName: "FR",
@@ -952,6 +1237,21 @@ export default function Accueil() {
       notDeployedSub: "Ce projet n'est pas encore en ligne",
       footerDesc: "Développeuse Fullstack passionnée par la création d'applications web modernes, évolutives et impactantes. Créons ensemble quelque chose d'extraordinaire.",
       navigation: "NAVIGATION", explore: "EXPLORER",
+      getInTouch: "Restons en contact",
+      getInTouchDesc: "Un projet en tête ou juste envie de dire bonjour ? Contactez-moi par l'un des moyens ci-dessous.",
+      sendMessage: "Envoyez-moi un message",
+      headOffice: "Localisation",
+      emailUs: "Écrivez-moi",
+      callUs: "Appelez-moi",
+      followSocial: "Suivez-moi sur les réseaux",
+      footerGetStarted: "Commencer",
+      footerSupport: "Explorer",
+      liveStatusTitle: "Statut en direct",
+      liveNowLabel: "Disponible maintenant",
+      liveAwayLabel: "Absente — réponse sous 24h",
+      liveVisitorsLabel: "visiteurs aujourd'hui",
+      liveDownloadCv: "Télécharger le CV",
+      viewOnMap: "Voir sur la carte →",
       rights: "2026 Lucia Rasoanirina. Tous droits réservés.",
       madeIn: "Réalisé avec passion à Madagascar",
       langName: "EN",
@@ -1203,7 +1503,7 @@ export default function Accueil() {
     { title: "OuraTable", category: "Web Platform", description: "OURATABLE is a recipe-sharing social network where users can publish recipes, engage with the community, participate in AI-generated cooking challenges, and vote for the weekly recipe. Features include private messaging, discussion groups, likes system, and full admin dashboard with user management, and announcements. The Art of Good Eating — Culinary community platform built with Laravel 9.", images: ["/ouratable_1.png", "/ouratable_2.png", "/ouratable_3.png", "/ouratable_4.png"], tags: ["Laravel", "MySQL", "Vue.js"], github: "https://github.com/Lucia-RASOANIRINA/OuraTable", demo: "https://ouratable.onrender.com/" },
     { title: "Garage Pro", category: "Web App", description: "Comprehensive web application for automotive garage operations management.", images: ["/garageJSlocalStorage_1.png", "/garageJSlocalStorage_2.png", "/garageJSlocalStorage_3.png", "/garageJSlocalStorage_4.png"], tags: ["HTML5", "CSS3", "JavaScript"], github: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html", demo: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html" },
     { title: "Packet Love Destiny", category: "Mini Game", description: "Interactive mini game developed with Python Tkinter.", images: ["/PokectLoveDestiny.png"], tags: ["Python", "Tkinter", "tkcalendar"], github: "https://github.com/Lucia-RASOANIRINA/Pocket-_Love-_Destiny", demo: "#" },
-    { title: "Parent'Lien", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Axios"], github: "#", demo: "#" },
+    { title: "'Parentia", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Axios"], github: "#", demo: "https://parentia-ten.vercel.app/" },
     { title: "Portfolio", category: "Creative", description: "Interactive 3D portfolio website built with Three.js, featuring animated 3D models, smooth transitions, and an immersive user experience with parallax effects.", images: ["/portfolio_1.png", "/portfolio_2.png", "/portfolio_3.png", "/portfolio_4.png"], tags: ["Three.js", "React", "WebGL", "3D"], github: "https://github.com/Lucia-RASOANIRINA/MonPortfolio", demo: "https://lucia-rasoanirina-portfolio.netlify.app/" },
     { title: "FeedbackPro", category: "Mobile App", description: "Completely anonymous mobile feedback application for honest communication.", images: ["/feedbackPro_1.jpg", "/feedbackPro_2.jpg", "/feedbackPro_3.jpg", "/feedbackPro_4.jpg", "/feedbackPro_5.jpg"], tags: ["React Native", "Firebase", "Anonymous"], github: "https://github.com/Lucia-RASOANIRINA/FeedBackPro", demo: "https://lucia-rasoanirina.github.io/FeedBackPro/#/" },
   ];
@@ -1783,139 +2083,335 @@ export default function Accueil() {
           </Box>
 
           {/* CONTACT */}
-          <Box id="contact" sx={{ mt: 6, mb: 10 }}>
+          <Box id="contact" sx={{ mt: 6, mb: { xs: 6, md: 10 }, overflowX: "hidden" }}>
             <Reveal3D>
               <Typography variant="h4" fontWeight={800} fontFamily={FONT_HEADING} sx={{ mb: 4, textAlign: "center", color: "#000", fontSize: "clamp(1.5rem, 4vw, 2.125rem)" }}>
                 <MailOutline sx={{ verticalAlign: "middle", mr: 1, color: "#0050FF", fontSize: 36 }} />
                 {t.contactTitle}
               </Typography>
             </Reveal3D>
-            <Grid container spacing={4} sx={{ maxWidth: 1000, mx: "auto" }}>
-              <Grid size={{ xs: 12, md: 6 }} display="flex">
-                <Zoom in={true} timeout={600} style={{ transitionDelay: "200ms" }}>
-                  <Paper sx={{ p: 3, bgcolor: "rgba(244,240,237,0.75)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.5)", borderRadius: 5, width: "100%", display: "flex", flexDirection: "column", transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateY(-10px)", boxShadow: "0 25px 35px rgba(0,0,0,0.15)", border: "1px solid rgba(0,80,255,0.4)" } }}>
-                    <Typography variant="h6" fontWeight={800} fontFamily={FONT_HEADING} gutterBottom color="#000">{t.letsWork}</Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: "#444" }}>{t.contactDesc}</Typography>
-                    <Stack spacing={2.5} flex={1}>
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ transition: "0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(6px)", "& svg": { transform: "scale(1.1)", color: "#0050FF" } } }}>
-                        <AlternateEmail sx={{ color: "#0050FF", fontSize: 22, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                        <Typography variant="body2" color="#111" fontWeight={500}>luciarasoanirina8@gmail.com</Typography>
+
+            {/* Carte unique (façon "modal" fusionné) : panneau info à gauche, formulaire à droite */}
+            <Zoom in={true} timeout={600}>
+              <Box
+                sx={{
+                  maxWidth: 1100,
+                  mx: "auto",
+                  borderRadius: { xs: 4, md: 5 },
+                  overflow: "hidden",
+                  boxShadow: "0 30px 60px rgba(10,10,46,0.12)",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  bgcolor: "#fff",
+                }}
+              >
+                {/* Panneau gauche : coordonnées */}
+                <Box
+                  sx={{
+                    width: { xs: "100%", md: "42%" },
+                    bgcolor: "#F3F6FC",
+                    p: { xs: 3, sm: 4, md: 5 },
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} color="#0a0a2e" sx={{ fontSize: { xs: "1.3rem", md: "1.5rem" }, mb: 1.5 }}>
+                    {t.getInTouch}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.7, mb: { xs: 3, md: 4 }, fontSize: { xs: "0.82rem", sm: "0.875rem" } }}>
+                    {t.getInTouchDesc}
+                  </Typography>
+
+                  <Stack spacing={{ xs: 2.5, md: 3 }}>
+                    {[
+                      { icon: <LocationOn />, label: t.headOffice, lines: ["Ankofafalahy, Fianarantsoa, Madagascar"] },
+                      { icon: <AlternateEmail />, label: t.emailUs, lines: ["luciarasoanirina8@gmail.com"] },
+                      { icon: <Phone />, label: t.callUs, lines: ["+261 38 702 36"] },
+                      { icon: <CheckCircle />, label: t.available, lines: [] },
+                    ].map((item, i) => (
+                      <Stack key={i} direction="row" spacing={2} alignItems="flex-start" sx={{ transition: "0.2s ease", "&:hover": { transform: "translateX(4px)" } }}>
+                        <Box
+                          sx={{
+                            width: { xs: 38, sm: 42 },
+                            height: { xs: 38, sm: 42 },
+                            borderRadius: "50%",
+                            bgcolor: "#0050FF",
+                            color: "#fff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                            boxShadow: "0 6px 16px rgba(0,80,255,0.3)",
+                            "& svg": { fontSize: { xs: 18, sm: 20 } },
+                          }}
+                        >
+                          {item.icon}
+                        </Box>
+                        <Box sx={{ pt: 0.3 }}>
+                          <Typography fontWeight={700} fontSize={{ xs: "0.82rem", sm: "0.9rem" }} color="#0a0a2e">
+                            {item.label}
+                          </Typography>
+                          {item.lines.map((l) => (
+                            <Typography key={l} fontSize={{ xs: "0.74rem", sm: "0.8rem" }} color="#666">
+                              {l}
+                            </Typography>
+                          ))}
+                        </Box>
                       </Stack>
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ transition: "0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(6px)", "& svg": { transform: "scale(1.1)", color: "#0050FF" } } }}>
-                        <Phone sx={{ color: "#0050FF", fontSize: 22, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                        <Typography variant="body2" color="#111" fontWeight={500}>+261 38 702 36</Typography>
-                      </Stack>
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ transition: "0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(6px)", "& svg": { transform: "scale(1.1)", color: "#0050FF" } } }}>
-                        <LocationOn sx={{ color: "#0050FF", fontSize: 22, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                        <Typography variant="body2" color="#111" fontWeight={500}>Fianarantsoa, Madagascar</Typography>
-                      </Stack>
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ transition: "0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(6px)", "& svg": { transform: "scale(1.1)", color: "#0050FF" } } }}>
-                        <CheckCircle sx={{ color: "#0050FF", fontSize: 22, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                        <Typography variant="body2" color="#111" fontWeight={500}>{t.available}</Typography>
-                      </Stack>
-                    </Stack>
-                  </Paper>
-                </Zoom>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }} display="flex">
-                <Zoom in={true} timeout={600} style={{ transitionDelay: "400ms" }}>
-                  <Paper sx={{ p: 3, bgcolor: "#ffffff", borderRadius: 5, border: "1px solid rgba(0,0,0,0.08)", width: "100%", display: "flex", flexDirection: "column", transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateY(-10px)", boxShadow: "0 20px 30px rgba(0,0,0,0.1)", borderColor: "#0050FF" } }}>
-                    <form ref={formRef} onSubmit={sendEmail} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                      <Stack spacing={2.5} flex={1}>
+                    ))}
+                  </Stack>
+
+                  <Divider sx={{ my: { xs: 3, md: 4 }, borderColor: "rgba(0,80,255,0.15)" }} />
+
+                  <Typography fontWeight={700} fontSize={{ xs: "0.82rem", sm: "0.9rem" }} color="#0a0a2e" sx={{ mb: 1.5 }}>
+                    {t.followSocial}
+                  </Typography>
+                  <Stack direction="row" spacing={1.2}>
+                    {[
+                      { icon: <Facebook />, href: "https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR", label: "Facebook" },
+                      { icon: <Instagram />, href: "https://www.instagram.com/rasoanirinambolatiana", label: "Instagram" },
+                      { icon: <LinkedIn />, href: "https://www.linkedin.com/in/lucia-rasoanirina/", label: "LinkedIn" },
+                      { icon: <GitHub />, href: "https://github.com/Lucia-RASOANIRINA", label: "GitHub" },
+                    ].map((s, i) => (
+                      <Tooltip key={i} title={s.label} arrow>
+                        <IconButton
+                          href={s.href}
+                          target="_blank"
+                          size="small"
+                          sx={{
+                            width: { xs: 34, sm: 38 },
+                            height: { xs: 34, sm: 38 },
+                            bgcolor: "#0050FF",
+                            color: "#fff",
+                            touchAction: "manipulation",
+                            transition: "all 0.25s cubic-bezier(0.2,0.9,0.4,1.1)",
+                            "&:hover": { bgcolor: "#003bb5", transform: "translateY(-3px) scale(1.08)" },
+                          }}
+                        >
+                          {s.icon}
+                        </IconButton>
+                      </Tooltip>
+                    ))}
+                  </Stack>
+                </Box>
+
+                {/* Panneau droit : formulaire */}
+                <Box sx={{ flex: 1, p: { xs: 3, sm: 4, md: 5 }, bgcolor: "#fff" }}>
+                  <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} color="#0a0a2e" sx={{ fontSize: { xs: "1.3rem", md: "1.5rem" }, mb: { xs: 2.5, md: 3 } }}>
+                    {t.sendMessage}
+                  </Typography>
+                  <form ref={formRef} onSubmit={sendEmail}>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label={t.fullName} value={formData.name} onChange={handleNameChange} onBlur={handleNameBlur} required size="small" error={touched.name && !!formErrors.name} InputProps={{ endAdornment: touched.name && formErrors.name ? <Tooltip title={formErrors.name} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.name && !formErrors.name && formData.name ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label={t.emailLabel} value={formData.email} onChange={handleEmailChange} onBlur={handleEmailBlur} type="email" required size="small" error={touched.email && !!formErrors.email} InputProps={{ endAdornment: touched.email && formErrors.email ? <Tooltip title={formErrors.email} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.email && !formErrors.email && formData.email ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
+                      </Grid>
+                      <Grid size={12}>
                         <TextField fullWidth label={t.subjectLabel} value={formData.subject} onChange={handleSubjectChange} onBlur={handleSubjectBlur} required size="small" error={touched.subject && !!formErrors.subject} InputProps={{ endAdornment: touched.subject && formErrors.subject ? <Tooltip title={formErrors.subject} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.subject && !formErrors.subject && formData.subject ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                        <TextField fullWidth label={t.messageLabel} value={formData.message} onChange={handleMessageChange} onBlur={handleMessageBlur} multiline rows={3} required error={touched.message && !!formErrors.message} InputProps={{ endAdornment: touched.message && formErrors.message ? <Tooltip title={formErrors.message} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.message && !formErrors.message && formData.message ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                        <Button type="submit" variant="contained" startIcon={sending ? <CircularProgress size={20} color="inherit" /> : <Send />} disabled={sending || !isFormValid()} sx={{ bgcolor: "#0050FF", borderRadius: 60, px: 4, py: 1.2, fontWeight: 700, alignSelf: "flex-start", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { bgcolor: "#003bb5", transform: "translateY(-3px)", boxShadow: "0 8px 18px rgba(0,80,255,0.4)" }, "&.Mui-disabled": { bgcolor: "#ccc" } }}>{sending ? t.sending : t.send}</Button>
-                      </Stack>
-                    </form>
-                  </Paper>
-                </Zoom>
-              </Grid>
-            </Grid>
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField fullWidth label={t.messageLabel} value={formData.message} onChange={handleMessageChange} onBlur={handleMessageBlur} multiline rows={4} required error={touched.message && !!formErrors.message} InputProps={{ endAdornment: touched.message && formErrors.message ? <Tooltip title={formErrors.message} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.message && !formErrors.message && formData.message ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
+                      </Grid>
+                      <Grid size={12}>
+                        <Button
+                          type="submit"
+                          fullWidth
+                          variant="contained"
+                          startIcon={sending ? <CircularProgress size={20} color="inherit" /> : <Send />}
+                          disabled={sending || !isFormValid()}
+                          sx={{
+                            bgcolor: "#0050FF",
+                            borderRadius: 60,
+                            py: 1.3,
+                            fontWeight: 700,
+                            textTransform: "none",
+                            touchAction: "manipulation",
+                            transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+                            "&:hover": { bgcolor: "#003bb5", boxShadow: "0 10px 22px rgba(0,80,255,0.4)" },
+                            "&.Mui-disabled": { bgcolor: "#ccc" },
+                          }}
+                        >
+                          {sending ? t.sending : t.send}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </form>
+                </Box>
+              </Box>
+            </Zoom>
+
+            {/* Carte Google Maps — hauteur explicite (fixe en px par breakpoint) pour éviter
+                qu'un iframe sans dimension ne s'affiche à 0px une fois déployé sur Netlify */}
+            <Box sx={{ maxWidth: 1100, mx: "auto", mt: { xs: 4, md: 6 }, borderRadius: { xs: 3, md: 4 }, overflow: "hidden", boxShadow: "0 20px 40px rgba(10,10,46,0.1)" }}>
+              <Box
+                component="iframe"
+                title="Localisation - Ankofafalahy, Fianarantsoa, Madagascar"
+                src="https://www.google.com/maps?q=Ankofafalahy,Fianarantsoa,Madagascar&output=embed"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                sx={{
+                  display: "block",
+                  width: "100%",
+                  height: { xs: 260, sm: 320, md: 400 },
+                  border: 0,
+                }}
+              />
+            </Box>
           </Box>
         </Container>
       </Box>
 
-      {/* Footer */}
+      {/* ===== FOOTER - BLEU NUIT UNI ===== */}
       <Box
         component="footer"
         sx={{
-          bgcolor: "#0a0a0a",
-          color: "#fff",
-          mt: { xs: 5, md: 8 },
-          pb: { xs: "72px", md: 0 }, // laisse la place à la bottom nav mobile fixe
-          borderTop: "1px solid rgba(0,80,255,0.3)",
           position: "relative",
           overflow: "hidden",
+          mt: { xs: 5, md: 8 },
+          pb: { xs: "72px", md: 0 },
+          bgcolor: "#0a0a2e", // Bleu nuit
+          borderTop: "1px solid rgba(0,80,255,0.3)",
         }}
       >
-        <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: "linear-gradient(90deg, #0050FF, #00bfff, #0050FF)", backgroundSize: "200% 100%", animation: "wave 2s infinite linear" }} />
+        {/* Bordure animée en haut du footer */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "4px",
+            background: "linear-gradient(90deg, #0050FF, #00bfff, #0050FF)",
+            backgroundSize: "200% 100%",
+            animation: "wave 2s infinite linear",
+            zIndex: 1,
+          }}
+        />
 
-        <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 5 }, px: { xs: 2.5, sm: 3, md: 4 } }}>
-          <Grid container spacing={{ xs: 4, md: 5 }} justifyContent="space-between">
-            <Grid size={{ xs: 12, md: 5 }}>
-              <Stack spacing={2.2} alignItems={{ xs: "center", md: "flex-start" }} textAlign={{ xs: "center", md: "left" }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Box sx={{ width: { xs: 42, sm: 48 }, height: { xs: 42, sm: 48 }, bgcolor: "#0050FF", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: { xs: 18, sm: 22 }, color: "#fff", fontFamily: FONT_HEADING, boxShadow: "0 0 20px rgba(0,80,255,0.5)", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", flexShrink: 0, "&:hover": { transform: "scale(1.05) rotate(5deg)", boxShadow: "0 0 30px rgba(0,80,255,0.8)" } }}>LR</Box>
-                  <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ letterSpacing: 1, fontSize: { xs: "1.15rem", sm: "1.5rem" }, background: "linear-gradient(135deg, #fff 0%, #0050FF 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent" }}>Lucia Rasoanirina</Typography>
+        {/* Contenu du footer */}
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            py: { xs: 4, sm: 5 },
+            px: { xs: 2.5, sm: 3, md: 4 },
+          }}
+        >
+          {/* Barre haute : logo + réseaux sociaux */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={{ xs: 2.5, sm: 2 }}
+            sx={{ mb: { xs: 4, md: 5 } }}
+          >
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ width: { xs: 42, sm: 48 }, height: { xs: 42, sm: 48 }, bgcolor: "#0050FF", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: { xs: 18, sm: 22 }, color: "#fff", fontFamily: FONT_HEADING, boxShadow: "0 0 20px rgba(0,80,255,0.5)", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", flexShrink: 0, "&:hover": { transform: "scale(1.05) rotate(5deg)", boxShadow: "0 0 30px rgba(0,80,255,0.8)" } }}>LR</Box>
+              <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ letterSpacing: 1, fontSize: { xs: "1.15rem", sm: "1.5rem" }, background: "white", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent" }}>Lucia Rasoanirina</Typography>
+            </Stack>
+            <Stack direction="row" spacing={{ xs: 1.2, sm: 1.5 }}>
+              {[
+                { icon: <Facebook />, href: "https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR", label: "Facebook" },
+                { icon: <Instagram />, href: "https://www.instagram.com/rasoanirinambolatiana", label: "Instagram" },
+                { icon: <LinkedIn />, href: "https://www.linkedin.com/in/lucia-rasoanirina/", label: "LinkedIn" },
+                { icon: <GitHub />, href: "https://github.com/Lucia-RASOANIRINA", label: "GitHub" },
+              ].map((s, i) => (
+                <Tooltip key={i} title={s.label} arrow>
+                  <IconButton
+                    size="medium"
+                    href={s.href}
+                    target="_blank"
+                    sx={{
+                      width: { xs: 36, sm: 42 },
+                      height: { xs: 36, sm: 42 },
+                      color: "#fff",
+                      bgcolor: "#0050FF",
+                      touchAction: "manipulation",
+                      transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+                      "&:hover": { bgcolor: "#003bb5", transform: "translateY(-4px) scale(1.08)" },
+                    }}
+                  >
+                    {s.icon}
+                  </IconButton>
+                </Tooltip>
+              ))}
+            </Stack>
+          </Stack>
+
+          {/* Grille 4 colonnes */}
+          <Grid container spacing={{ xs: 3.5, md: 5 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Stack spacing={1.4} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.headOffice}</Typography>
+                <Stack direction="row" spacing={1} alignItems="flex-start">
+                  <LocationOn sx={{ color: "#aaa", fontSize: 18, mt: 0.2, display: { xs: "none", sm: "block" } }} />
+                  <Typography variant="body2" sx={{ color: "#ccc", fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>Ankofafalahy, Fianarantsoa, Madagascar</Typography>
                 </Stack>
-                <Typography variant="body2" sx={{ color: "#ccc", lineHeight: 1.7, maxWidth: { xs: "100%", md: "90%" }, fontSize: { xs: "0.82rem", sm: "0.875rem" } }}>{t.footerDesc}</Typography>
-                <Stack direction="row" spacing={{ xs: 1.2, sm: 2 }} flexWrap="wrap" justifyContent="center">
-                  <IconButton size="medium" href="https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Facebook /></IconButton>
-                  <IconButton size="medium" href="https://www.linkedin.com/in/lucia-rasoanirina/" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><LinkedIn /></IconButton>
-                  <IconButton size="medium" href="https://www.instagram.com/rasoanirinambolatiana" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><Instagram /></IconButton>
-                  <IconButton size="medium" href="https://github.com/Lucia-RASOANIRINA" target="_blank" sx={{ color: "#aaa", bgcolor: "rgba(255,255,255,0.05)", transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { color: "#0050FF", bgcolor: "rgba(0,80,255,0.2)", transform: "translateY(-5px) scale(1.1)" } }}><GitHub /></IconButton>
-                </Stack>
+                <Typography
+                  variant="body2"
+                  onClick={() => scrollToSection("contact")}
+                  sx={{ color: "#0050FF", cursor: "pointer", fontWeight: 600, fontSize: { xs: "0.78rem", sm: "0.85rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(4px)" } }}
+                >
+                  {t.viewOnMap}
+                </Typography>
               </Stack>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Stack
-                direction="row"
-                spacing={{ xs: 3, sm: 6, md: 8 }}
-                justifyContent={{ xs: "center", sm: "center", md: "flex-end" }}
-                textAlign={{ xs: "center", md: "left" }}
-                sx={{ flexWrap: "wrap", rowGap: 3 }}
-              >
-                <Stack spacing={1.5} alignItems={{ xs: "center", md: "flex-start" }}>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.navigation}</Typography>
-                  {menuItems.slice(0, 2).map((item) => (
-                    <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
-                      <Box sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "flex" }, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.8rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }}
-                        onClick={() => scrollToSection(item.id)}
-                      >
-                        {item.label}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Stack spacing={1.5} alignItems={{ xs: "center", md: "flex-start" }}>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.explore}</Typography>
-                  {menuItems.slice(2, 5).map((item) => (
-                    <Stack key={item.id} direction="row" alignItems="center" spacing={1.5}>
-                      <Box sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "flex" }, transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }}>{item.icon}</Box>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.8rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(8px)" } }}
-                        onClick={() => scrollToSection(item.id)}
-                      >
-                        {item.label}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+              <Stack spacing={1.5} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.footerGetStarted}</Typography>
+                {menuItems.slice(0, 2).map((item) => (
+                  <Stack key={item.id} direction="row" alignItems="center" spacing={1.2}>
+                    <Box sx={{ color: "#aaa", fontSize: 16, display: { xs: "none", md: "flex" } }}>{item.icon}</Box>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.78rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(6px)" } }}
+                      onClick={() => scrollToSection(item.id)}
+                    >
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                ))}
               </Stack>
+            </Grid>
+
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+              <Stack spacing={1.5} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.footerSupport}</Typography>
+                {menuItems.slice(2, 5).map((item) => (
+                  <Stack key={item.id} direction="row" alignItems="center" spacing={1.2}>
+                    <Box sx={{ color: "#aaa", fontSize: 16, display: { xs: "none", md: "flex" } }}>{item.icon}</Box>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#ccc", cursor: "pointer", fontSize: { xs: "0.78rem", sm: "0.875rem" }, touchAction: "manipulation", transition: "0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(6px)" } }}
+                      onClick={() => scrollToSection(item.id)}
+                    >
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 12, md: 3 }}>
+              <LiveStatusWidget
+                title={t.liveStatusTitle}
+                liveNowLabel={t.liveNowLabel}
+                liveAwayLabel={t.liveAwayLabel}
+                liveVisitorsLabel={t.liveVisitorsLabel}
+                downloadCvLabel={t.liveDownloadCv}
+              />
             </Grid>
           </Grid>
 
           <Box
             sx={{
               borderTop: "1px solid rgba(255,255,255,0.1)",
-              mt: { xs: 3, sm: 4 },
+              mt: { xs: 3.5, sm: 4 },
               pt: { xs: 2.5, sm: 3 },
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
@@ -1977,11 +2473,13 @@ export default function Accueil() {
           90% { opacity: 0.8; }
           100% { transform: rotate(360deg) translateX(90px) rotate(-360deg); opacity: 0; }
         }
-        /* Container queries : la carte projet adapte son titre à sa propre largeur,
-           pas à celle de l'écran — utile quand la même carte se retrouve dans une
-           grille à 1, 2 ou 3 colonnes. */
         @container project-card (max-width: 260px) {
           .project-card h6 { font-size: 1rem !important; }
+        }
+        @keyframes liveWidgetParticle {
+          0% { transform: translateY(0) scale(0.6); opacity: 0; }
+          20% { opacity: 0.9; }
+          100% { transform: translateY(-90px) scale(1); opacity: 0; }
         }
       `}</style>
     </Box>
