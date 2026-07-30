@@ -13,7 +13,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Grid,
   Card,
   CardContent,
   CardActions,
@@ -88,7 +87,7 @@ import {
 } from "@mui/icons-material";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FaDatabase, FaPython, FaReact, FaJava, FaHtml5, FaCss3Alt, FaLaravel, FaVuejs, FaNodeJs, FaJs, FaFigma } from "react-icons/fa";
-import { SiTypescript, SiVite, SiExpress, SiMongodb, SiTailwindcss, SiRedux, SiNextdotjs, SiNestjs, SiFlutter, SiSupabase, SiNetlify, SiSharp, SiGo, SiRust, SiSpringboot, SiDjango, SiAngular, SiDocker, SiGithubactions, SiAmazon, SiRedis, SiTensorflow, SiOpenai, SiLinux } from "react-icons/si";
+import { SiTypescript, SiVite, SiExpress, SiMongodb, SiTailwindcss, SiRedux, SiNextdotjs, SiNestjs, SiFlutter, SiSupabase, SiNetlify, SiSharp, SiGo, SiRust, SiSpringboot, SiDjango, SiAngular, SiDocker, SiGithubactions, SiAmazon, SiRedis, SiTensorflow, SiOpenai, SiLinux, SiVercel } from "react-icons/si";
 import emailjs from "@emailjs/browser";
 import CvLivre from "./CvLivre";
 
@@ -135,6 +134,8 @@ interface Project {
   images: string[];
   tags: string[];
   github: string;
+  githubFront?: string;
+  githubBack?: string;
   demo: string;
 }
 interface FormData {
@@ -1448,9 +1449,11 @@ export default function Accueil() {
     { name: "Java", icon: <FaJava />, detail: "Object-oriented programming, Spring Boot basics, JUnit testing, collections framework.", category: "Programming Languages", level: "Beginner" },
     { name: "MySQL / PostgreSQL", icon: <FaDatabase />, detail: "Complex queries, optimization, indexing, transactions, database design, migrations.", category: "Database", level: "Advanced" },
     { name: "MongoDB", icon: <SiMongodb />, detail: "NoSQL database, aggregation pipelines, indexing, sharding, replica sets, CRUD operations.", category: "Database", level: "Intermediate" },
+    { name: "Neon", icon: <Storage sx={{ color: "#0050FF" }} />, detail: "Serverless PostgreSQL platform, instant provisioning, database branching, autoscaling, connection pooling.", category: "Database", level: "Intermediate" },
     { name: "Flutter", icon: <SiFlutter />, detail: "Cross-platform mobile development, Dart programming, widgets, state management, animations, Firebase integration.", category: "Mobile Development", level: "Beginner" },
     { name: "Supabase", icon: <SiSupabase />, detail: "Open-source Firebase alternative, PostgreSQL database, real-time subscriptions, authentication, storage, edge functions.", category: "Backend as a Service", level: "Intermediate" },
     { name: "Netlify", icon: <SiNetlify />, detail: "Continuous deployment, serverless functions, form handling, split testing, analytics, edge CDN.", category: "Deployment & Hosting", level: "Advanced" },
+    { name: "Vercel", icon: <SiVercel />, detail: "Serverless deployment platform, edge functions, automatic CI/CD, preview deployments, global CDN, framework-aware builds.", category: "Deployment & Hosting", level: "Advanced" },
     { name: "Figma", icon: <FaFigma />, detail: "UI/UX design, prototyping, design systems, collaborative design, vector graphics, component libraries.", category: "Design Tools", level: "Intermediate" },
     { name: "Material UI (MUI)", icon: <SiVite />, detail: "Modern component library, custom theming, responsive design system, component customization.", category: "UI Libraries", level: "Advanced" },
     { name: "Redux Toolkit", icon: <SiRedux />, detail: "State management, slices, selectors, async thunks, middleware, devtools integration.", category: "State Management", level: "Intermediate" },
@@ -1459,7 +1462,7 @@ export default function Accueil() {
     { name: "C# / .NET", icon: <SiSharp />, detail: "Object-oriented programming, LINQ, ASP.NET Core, Entity Framework, dependency injection, async programming.", category: "Programming Languages", level: "Beginner" },
     { name: "Go (Golang)", icon: <SiGo />, detail: "Concurrency with goroutines, channels, structs, interfaces, building fast and scalable backend services.", category: "Programming Languages", level: "Beginner" },
     { name: "Rust", icon: <SiRust />, detail: "Memory safety without garbage collection, ownership model, borrowing, traits, high-performance systems programming.", category: "Programming Languages", level: "Beginner" },
-    { name: "Spring Boot", icon: <SiSpringboot />, detail: "Java backend framework, REST APIs, dependency injection, JPA/Hibernate, Spring Security, microservices.", category: "Backend", level: "Beginner" },
+    { name: "Spring Boot", icon: <SiSpringboot />, detail: "Java backend framework, REST APIs, dependency injection, JPA/Hibernate, Spring Security, microservices.", category: "Backend", level: "Intermediate" },
     { name: "Django / FastAPI", icon: <SiDjango />, detail: "Python web frameworks, ORM, REST APIs, async endpoints, automatic documentation, authentication.", category: "Backend", level: "Intermediate" },
     { name: "React Native", icon: <FaReact />, detail: "Cross-platform mobile apps, native components, navigation, Firebase integration, push notifications, app deployment.", category: "Mobile Development", level: "Intermediate" },
     { name: "Microservices & API Design", icon: <Hub sx={{ color: "#0050FF" }} />, detail: "Service decomposition, REST & gRPC, API gateways, message queues, service discovery, scalable architectures.", category: "Software Architecture", level: "Intermediate" },
@@ -1503,7 +1506,7 @@ export default function Accueil() {
     { title: "OuraTable", category: "Web Platform", description: "OURATABLE is a recipe-sharing social network where users can publish recipes, engage with the community, participate in AI-generated cooking challenges, and vote for the weekly recipe. Features include private messaging, discussion groups, likes system, and full admin dashboard with user management, and announcements. The Art of Good Eating — Culinary community platform built with Laravel 9.", images: ["/ouratable_1.png", "/ouratable_2.png", "/ouratable_3.png", "/ouratable_4.png"], tags: ["Laravel", "MySQL", "Vue.js"], github: "https://github.com/Lucia-RASOANIRINA/OuraTable", demo: "https://ouratable.onrender.com/" },
     { title: "Garage Pro", category: "Web App", description: "Comprehensive web application for automotive garage operations management.", images: ["/garageJSlocalStorage_1.png", "/garageJSlocalStorage_2.png", "/garageJSlocalStorage_3.png", "/garageJSlocalStorage_4.png"], tags: ["HTML5", "CSS3", "JavaScript"], github: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html", demo: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html" },
     { title: "Packet Love Destiny", category: "Mini Game", description: "Interactive mini game developed with Python Tkinter.", images: ["/PokectLoveDestiny.png"], tags: ["Python", "Tkinter", "tkcalendar"], github: "https://github.com/Lucia-RASOANIRINA/Pocket-_Love-_Destiny", demo: "#" },
-    { title: "'Parentia", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Axios"], github: "#", demo: "https://parentia-ten.vercel.app/" },
+    { title: "'Parentia", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Axios"], github: "#", githubFront: "https://github.com/Lucia-RASOANIRINA/Parentia_Frontend", githubBack: "https://github.com/Lucia-RASOANIRINA/Parentia_Backend", demo: "https://parentia-ten.vercel.app/" },
     { title: "Portfolio", category: "Creative", description: "Interactive 3D portfolio website built with Three.js, featuring animated 3D models, smooth transitions, and an immersive user experience with parallax effects.", images: ["/portfolio_1.png", "/portfolio_2.png", "/portfolio_3.png", "/portfolio_4.png"], tags: ["Three.js", "React", "WebGL", "3D"], github: "https://github.com/Lucia-RASOANIRINA/MonPortfolio", demo: "https://lucia-rasoanirina-portfolio.netlify.app/" },
     { title: "FeedbackPro", category: "Mobile App", description: "Completely anonymous mobile feedback application for honest communication.", images: ["/feedbackPro_1.jpg", "/feedbackPro_2.jpg", "/feedbackPro_3.jpg", "/feedbackPro_4.jpg", "/feedbackPro_5.jpg"], tags: ["React Native", "Firebase", "Anonymous"], github: "https://github.com/Lucia-RASOANIRINA/FeedBackPro", demo: "https://lucia-rasoanirina.github.io/FeedBackPro/#/" },
   ];
@@ -1576,6 +1579,68 @@ export default function Accueil() {
     }))
   );
   const stars = starsRef.current;
+
+  // Rendu d'une catégorie de connaissance académique (factorisé pour permettre
+  // de regrouper "Web Fundamentals" et "Styling" côte à côte en desktop)
+  const renderKnowledgeCategory = (category: string, items: typeof academicKnowledge, catIdx: number) => (
+    <>
+      <Reveal variant="fade-up" delay={catIdx * 50}>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ mb: 4 }}>
+          <Divider sx={{ flex: 1, bgcolor: "rgba(0,80,255,0.2)" }} />
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ bgcolor: "rgba(0,80,255,0.05)", px: 3, py: 1, borderRadius: 50, border: "1px solid rgba(0,80,255,0.2)" }}>
+            {knowledgeCategoryIcons[category]}
+            <Typography variant="h5" fontWeight={700} fontFamily={FONT_HEADING} color="#0050FF" letterSpacing={1}>{category}</Typography>
+          </Stack>
+          <Divider sx={{ flex: 1, bgcolor: "rgba(0,80,255,0.2)" }} />
+        </Stack>
+      </Reveal>
+      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 3, width: "100%" }}>
+        {items.map((item, idx) => {
+          const isOpen = openConnaissanceDetail === item.name;
+          const shortDetail = item.detail.length > 80 ? item.detail.substring(0, 80) + "..." : item.detail;
+          return (
+            <Zoom in={true} timeout={400} style={{ transitionDelay: `${idx * 100}ms` }} key={idx}>
+              <Box
+                sx={{
+                  bgcolor: "rgba(244,240,237,0.75)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255,255,255,0.6)",
+                  p: 3,
+                  borderRadius: 3,
+                  transition: "all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+                  width: { xs: "100%", sm: "calc(50% - 24px)", md: "calc(33.333% - 24px)", lg: "calc(25% - 24px)" },
+                  minWidth: { xs: "100%", sm: "280px", md: "260px" },
+                  flexGrow: 0,
+                  transformStyle: "preserve-3d",
+                  "&:hover": { transform: "translateY(-6px) rotateX(3deg)", boxShadow: "0 12px 26px rgba(0,0,0,0.12)" },
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "auto",
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+                  <Box sx={{ fontSize: 32, color: "#0050FF" }}>{item.icon}</Box>
+                  <Typography fontWeight={700} fontSize={16} fontFamily={FONT_HEADING} color="#000">{item.name}</Typography>
+                </Stack>
+                <Chip label={item.level} size="small" sx={{ bgcolor: "#0050FF15", color: "#0050FF", fontSize: 10, height: 24, width: "fit-content", mb: 1.5, fontWeight: 600, borderRadius: 2 }} />
+                <Typography fontSize={12} color="#555" lineHeight={1.5} sx={{ mb: 1 }}>{isOpen ? item.detail : shortDetail}</Typography>
+                {item.detail.length > 80 && (
+                  <Button
+                    size="small"
+                    onClick={() => setOpenConnaissanceDetail(isOpen ? null : item.name)}
+                    sx={{ color: "#0050FF", textTransform: "none", p: 0, minWidth: "auto", fontSize: "0.75rem", fontWeight: 500, alignSelf: "flex-start", transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { bgcolor: "transparent", color: "#003bb5", transform: "translateX(2px)" } }}
+                  >
+                    <InfoOutlined sx={{ fontSize: 14, mr: 0.5, transition: "transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
+                    {isOpen ? t.showLess : t.moreInfo}
+                  </Button>
+                )}
+              </Box>
+            </Zoom>
+          );
+        })}
+      </Box>
+    </>
+  );
 
   return (
     <Box minHeight="100vh" bgcolor="#ffffff" position="relative" sx={{ overflowX: "hidden", fontFamily: FONT_BODY }}>
@@ -1825,65 +1890,45 @@ export default function Accueil() {
               <Typography variant="subtitle1" sx={{ textAlign: "center", mb: 5, color: "#666", maxWidth: 700, mx: "auto" }}>{t.knowledgeSubtitle}</Typography>
             </Fade>
 
-            {Object.entries(groupedAcademicKnowledge).map(([category, items], catIdx) => (
-              <Box key={category} sx={{ mb: 6 }}>
-                <Reveal variant="fade-up" delay={catIdx * 50}>
-                  <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ mb: 4 }}>
-                    <Divider sx={{ flex: 1, bgcolor: "rgba(0,80,255,0.2)" }} />
-                    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ bgcolor: "rgba(0,80,255,0.05)", px: 3, py: 1, borderRadius: 50, border: "1px solid rgba(0,80,255,0.2)" }}>
-                      {knowledgeCategoryIcons[category]}
-                      <Typography variant="h5" fontWeight={700} fontFamily={FONT_HEADING} color="#0050FF" letterSpacing={1}>{category}</Typography>
-                    </Stack>
-                    <Divider sx={{ flex: 1, bgcolor: "rgba(0,80,255,0.2)" }} />
-                  </Stack>
-                </Reveal>
-                <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 3, width: "100%" }}>
-                  {items.map((item, idx) => {
-                    const isOpen = openConnaissanceDetail === item.name;
-                    const shortDetail = item.detail.length > 80 ? item.detail.substring(0, 80) + "..." : item.detail;
-                    return (
-                      <Zoom in={true} timeout={400} style={{ transitionDelay: `${idx * 100}ms` }} key={idx}>
-                        <Box
-                          sx={{
-                            bgcolor: "rgba(244,240,237,0.75)",
-                            backdropFilter: "blur(8px)",
-                            border: "1px solid rgba(255,255,255,0.6)",
-                            p: 3,
-                            borderRadius: 3,
-                            transition: "all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
-                            width: { xs: "100%", sm: "calc(50% - 24px)", md: "calc(33.333% - 24px)", lg: "calc(25% - 24px)" },
-                            minWidth: { xs: "100%", sm: "280px", md: "260px" },
-                            flexGrow: 0,
-                            transformStyle: "preserve-3d",
-                            "&:hover": { transform: "translateY(-6px) rotateX(3deg)", boxShadow: "0 12px 26px rgba(0,0,0,0.12)" },
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "auto",
-                          }}
-                        >
-                          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
-                            <Box sx={{ fontSize: 32, color: "#0050FF" }}>{item.icon}</Box>
-                            <Typography fontWeight={700} fontSize={16} fontFamily={FONT_HEADING} color="#000">{item.name}</Typography>
-                          </Stack>
-                          <Chip label={item.level} size="small" sx={{ bgcolor: "#0050FF15", color: "#0050FF", fontSize: 10, height: 24, width: "fit-content", mb: 1.5, fontWeight: 600, borderRadius: 2 }} />
-                          <Typography fontSize={12} color="#555" lineHeight={1.5} sx={{ mb: 1 }}>{isOpen ? item.detail : shortDetail}</Typography>
-                          {item.detail.length > 80 && (
-                            <Button
-                              size="small"
-                              onClick={() => setOpenConnaissanceDetail(isOpen ? null : item.name)}
-                              sx={{ color: "#0050FF", textTransform: "none", p: 0, minWidth: "auto", fontSize: "0.75rem", fontWeight: 500, alignSelf: "flex-start", transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { bgcolor: "transparent", color: "#003bb5", transform: "translateX(2px)" } }}
-                            >
-                              <InfoOutlined sx={{ fontSize: 14, mr: 0.5, transition: "transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)" }} />
-                              {isOpen ? t.showLess : t.moreInfo}
-                            </Button>
-                          )}
-                        </Box>
-                      </Zoom>
-                    );
-                  })}
-                </Box>
-              </Box>
-            ))}
+            {(() => {
+              const entries = Object.entries(groupedAcademicKnowledge);
+              const elements: React.ReactNode[] = [];
+              let i = 0;
+              while (i < entries.length) {
+                const [category, items] = entries[i];
+                const next = entries[i + 1];
+                // "Web Fundamentals" et "Styling" côte à côte uniquement en desktop (md+),
+                // ils redeviennent empilés normalement en mobile.
+                if (category === "Web Fundamentals" && next && next[0] === "Styling") {
+                  const [category2, items2] = next;
+                  elements.push(
+                    <Box
+                      key={category}
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", md: "row" },
+                        gap: { xs: 0, md: 5 },
+                        mb: 6,
+                        "& > *": { flex: { xs: "unset", md: 1 }, mb: { xs: 6, md: 0 } },
+                        "& > *:last-of-type": { mb: { xs: 0, md: 0 } },
+                      }}
+                    >
+                      <Box>{renderKnowledgeCategory(category, items, i)}</Box>
+                      <Box>{renderKnowledgeCategory(category2, items2, i + 1)}</Box>
+                    </Box>
+                  );
+                  i += 2;
+                } else {
+                  elements.push(
+                    <Box key={category} sx={{ mb: 6 }}>
+                      {renderKnowledgeCategory(category, items, i)}
+                    </Box>
+                  );
+                  i += 1;
+                }
+              }
+              return elements;
+            })()}
 
             <Box sx={{ mt: 8 }}>
               <Reveal variant="fade-up">
@@ -2028,6 +2073,7 @@ export default function Accueil() {
                 const isProjectOpen = openProjectDetail === project.title;
                 const isMobileApp = project.category === "Mobile App";
                 const shortDescription = project.description.length > 100 ? project.description.substring(0, 100) + "..." : project.description;
+                const hasSplitRepos = !!(project.githubFront && project.githubBack);
                 return (
                   <Zoom in={true} timeout={500} style={{ transitionDelay: `${idx * 120}ms` }} key={project.title}>
                     <Box sx={{ width: { xs: "100%", sm: "calc(50% - 32px)", md: "calc(33.333% - 32px)" }, minWidth: { xs: "100%", sm: "320px" }, flexGrow: 0 }}>
@@ -2069,9 +2115,16 @@ export default function Accueil() {
                               </Button>
                             )}
                           </CardContent>
-                          <CardActions sx={{ px: 2.5, pb: 2.5, gap: 1 }}>
-                            <Button size="small" startIcon={<GitHub />} {...(project.github === "#" ? { onClick: handleNoLink } : { href: project.github, target: "_blank" })} sx={{ color: "#333", fontWeight: 600, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(3px)" } }}>{t.code}</Button>
-                            <Button size="small" startIcon={<Launch />} {...(project.demo === "#" ? { onClick: handleNoLink } : { href: project.demo, target: "_blank" })} sx={{ color: "#0050FF", fontWeight: 600, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(3px) scale(1.02)" } }}>{t.demo}</Button>
+                          <CardActions sx={{ px: 2.5, pb: 2.5, gap: { xs: 0.5, sm: 1 }, flexWrap: "nowrap", overflowX: "auto" }}>
+                            {hasSplitRepos ? (
+                              <>
+                                <Button size="small" startIcon={<GitHub sx={{ fontSize: 16 }} />} href={project.githubFront || "#"} target="_blank" sx={{ color: "#333", fontWeight: 600, whiteSpace: "nowrap", minWidth: "auto", px: { xs: 0.8, sm: 1.2 }, fontSize: { xs: "0.72rem", sm: "0.8125rem" }, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(3px)" } }}>Front</Button>
+                                <Button size="small" startIcon={<GitHub sx={{ fontSize: 16 }} />} href={project.githubBack || "#"} target="_blank" sx={{ color: "#333", fontWeight: 600, whiteSpace: "nowrap", minWidth: "auto", px: { xs: 0.8, sm: 1.2 }, fontSize: { xs: "0.72rem", sm: "0.8125rem" }, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(3px)" } }}>Back</Button>
+                              </>
+                            ) : (
+                              <Button size="small" startIcon={<GitHub />} {...(project.github === "#" ? { onClick: handleNoLink } : { href: project.github, target: "_blank" })} sx={{ color: "#333", fontWeight: 600, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { color: "#0050FF", transform: "translateX(3px)" } }}>{t.code}</Button>
+                            )}
+                            <Button size="small" startIcon={<Launch sx={hasSplitRepos ? { fontSize: 16 } : undefined} />} {...(project.demo === "#" ? { onClick: handleNoLink } : { href: project.demo, target: "_blank" })} sx={{ color: "#0050FF", fontWeight: 600, whiteSpace: "nowrap", minWidth: "auto", px: hasSplitRepos ? { xs: 0.8, sm: 1.2 } : undefined, fontSize: hasSplitRepos ? { xs: "0.72rem", sm: "0.8125rem" } : undefined, transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", "&:hover": { transform: "translateX(3px) scale(1.02)" } }}>{t.demo}</Button>
                           </CardActions>
                         </Card>
                       </GlowCard>
@@ -2197,25 +2250,25 @@ export default function Accueil() {
                 </Box>
 
                 {/* Panneau droit : formulaire */}
-                <Box sx={{ flex: 1, p: { xs: 3, sm: 4, md: 5 }, bgcolor: "#fff" }}>
+                <Box sx={{ flex: 1, p: { xs: 3, sm: 4, md: 5 }, bgcolor: "#fff", display: "flex", flexDirection: "column" }}>
                   <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} color="#0a0a2e" sx={{ fontSize: { xs: "1.3rem", md: "1.5rem" }, mb: { xs: 2.5, md: 3 } }}>
                     {t.sendMessage}
                   </Typography>
                   <form ref={formRef} onSubmit={sendEmail}>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 12, sm: 6 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                      <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" } }}>
                         <TextField fullWidth label={t.fullName} value={formData.name} onChange={handleNameChange} onBlur={handleNameBlur} required size="small" error={touched.name && !!formErrors.name} InputProps={{ endAdornment: touched.name && formErrors.name ? <Tooltip title={formErrors.name} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.name && !formErrors.name && formData.name ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 6 }}>
+                      </Box>
+                      <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" } }}>
                         <TextField fullWidth label={t.emailLabel} value={formData.email} onChange={handleEmailChange} onBlur={handleEmailBlur} type="email" required size="small" error={touched.email && !!formErrors.email} InputProps={{ endAdornment: touched.email && formErrors.email ? <Tooltip title={formErrors.email} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.email && !formErrors.email && formData.email ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                      </Grid>
-                      <Grid size={12}>
+                      </Box>
+                      <Box sx={{ width: "100%" }}>
                         <TextField fullWidth label={t.subjectLabel} value={formData.subject} onChange={handleSubjectChange} onBlur={handleSubjectBlur} required size="small" error={touched.subject && !!formErrors.subject} InputProps={{ endAdornment: touched.subject && formErrors.subject ? <Tooltip title={formErrors.subject} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.subject && !formErrors.subject && formData.subject ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                      </Grid>
-                      <Grid size={12}>
+                      </Box>
+                      <Box sx={{ width: "100%" }}>
                         <TextField fullWidth label={t.messageLabel} value={formData.message} onChange={handleMessageChange} onBlur={handleMessageBlur} multiline rows={4} required error={touched.message && !!formErrors.message} InputProps={{ endAdornment: touched.message && formErrors.message ? <Tooltip title={formErrors.message} arrow><ErrorOutline color="error" sx={{ fontSize: 20 }} /></Tooltip> : touched.message && !formErrors.message && formData.message ? <CheckCircleOutline color="success" sx={{ fontSize: 20 }} /> : null }} />
-                      </Grid>
-                      <Grid size={12}>
+                      </Box>
+                      <Box sx={{ width: "100%" }}>
                         <Button
                           type="submit"
                           fullWidth
@@ -2236,9 +2289,39 @@ export default function Accueil() {
                         >
                           {sending ? t.sending : t.send}
                         </Button>
-                      </Grid>
-                    </Grid>
+                      </Box>
+                    </Box>
                   </form>
+
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    alignItems="center"
+                    sx={{
+                      mt: { xs: 3, md: "auto" },
+                      pt: 2.5,
+                      borderTop: "1px solid rgba(0,80,255,0.1)",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "50%",
+                        bgcolor: "rgba(0,80,255,0.1)",
+                        color: "#0050FF",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <AccessTime sx={{ fontSize: 18 }} />
+                    </Box>
+                    <Typography sx={{ color: "#555", fontSize: { xs: "0.78rem", sm: "0.82rem" } }}>
+                      {t.available} · {t.liveAwayLabel.split("—")[1]?.trim() || t.liveAwayLabel}
+                    </Typography>
+                  </Stack>
                 </Box>
               </Box>
             </Zoom>
@@ -2343,13 +2426,36 @@ export default function Accueil() {
           </Stack>
 
           {/* Grille 4 colonnes */}
-          <Grid container spacing={{ xs: 3.5, md: 5 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 3.5, md: 5 } }}>
+            <Box sx={{ width: { xs: "100%", sm: "calc(50% - 14px)", md: "calc(25% - 30px)" } }}>
               <Stack spacing={1.4} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.headOffice}</Typography>
                 <Stack direction="row" spacing={1} alignItems="flex-start">
                   <LocationOn sx={{ color: "#aaa", fontSize: 18, mt: 0.2, display: { xs: "none", sm: "block" } }} />
                   <Typography variant="body2" sx={{ color: "#ccc", fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>Ankofafalahy, Fianarantsoa, Madagascar</Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <AlternateEmail sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "block" } }} />
+                  <Typography
+                    variant="body2"
+                    component="a"
+                    href="mailto:luciarasoanirina8@gmail.com"
+                    sx={{ color: "#ccc", fontSize: { xs: "0.8rem", sm: "0.875rem" }, textDecoration: "none", transition: "0.2s ease", "&:hover": { color: "#0050FF" } }}
+                  >
+                    luciarasoanirina8@gmail.com
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Phone sx={{ color: "#aaa", fontSize: 18, display: { xs: "none", sm: "block" } }} />
+                  <Typography
+                    variant="body2"
+                    component="a"
+                    href="https://wa.me/2613870236"
+                    target="_blank"
+                    sx={{ color: "#ccc", fontSize: { xs: "0.8rem", sm: "0.875rem" }, textDecoration: "none", transition: "0.2s ease", "&:hover": { color: "#0050FF" } }}
+                  >
+                    +261 38 702 36
+                  </Typography>
                 </Stack>
                 <Typography
                   variant="body2"
@@ -2359,9 +2465,9 @@ export default function Accueil() {
                   {t.viewOnMap}
                 </Typography>
               </Stack>
-            </Grid>
+            </Box>
 
-            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <Box sx={{ width: { xs: "calc(50% - 14px)", sm: "calc(50% - 14px)", md: "calc(25% - 30px)" } }}>
               <Stack spacing={1.5} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.footerGetStarted}</Typography>
                 {menuItems.slice(0, 2).map((item) => (
@@ -2377,9 +2483,9 @@ export default function Accueil() {
                   </Stack>
                 ))}
               </Stack>
-            </Grid>
+            </Box>
 
-            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <Box sx={{ width: { xs: "calc(50% - 14px)", sm: "calc(50% - 14px)", md: "calc(25% - 30px)" } }}>
               <Stack spacing={1.5} alignItems={{ xs: "center", sm: "flex-start" }} textAlign={{ xs: "center", sm: "left" }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#0050FF", letterSpacing: 1, fontSize: { xs: "0.78rem", sm: "0.85rem" } }}>{t.footerSupport}</Typography>
                 {menuItems.slice(2, 5).map((item) => (
@@ -2395,9 +2501,9 @@ export default function Accueil() {
                   </Stack>
                 ))}
               </Stack>
-            </Grid>
+            </Box>
 
-            <Grid size={{ xs: 12, sm: 12, md: 3 }}>
+            <Box sx={{ width: { xs: "100%", sm: "100%", md: "calc(25% - 30px)" } }}>
               <LiveStatusWidget
                 title={t.liveStatusTitle}
                 liveNowLabel={t.liveNowLabel}
@@ -2405,8 +2511,8 @@ export default function Accueil() {
                 liveVisitorsLabel={t.liveVisitorsLabel}
                 downloadCvLabel={t.liveDownloadCv}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
           <Box
             sx={{
@@ -2442,19 +2548,89 @@ export default function Accueil() {
       {openCv && <CvLivre onClose={() => setOpenCv(false)} />}
 
       {deployMsg && (
-        <Box sx={{ position: "fixed", inset: 0, zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", perspective: "1200px" }}>
-          <Box sx={{ pointerEvents: "auto", textAlign: "center", px: { xs: 4, md: 6 }, py: { xs: 3.5, md: 4.5 }, borderRadius: 2, color: "#0a0a2e", bgcolor: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)", border: "1px solid rgba(0,80,255,0.22)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 0 rgba(0,80,255,0.14), 0 24px 60px rgba(0,80,255,0.28)", transformStyle: "preserve-3d", animation: "deploy3d 2.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards" }}>
-            <Box sx={{ display: "inline-flex", color: "#0050FF", mb: 1.5, transformStyle: "preserve-3d", animation: "iconFloat3d 2.6s ease-in-out infinite" }}>
+        <Box sx={{ position: "fixed", inset: 0, zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", perspective: "1400px" }}>
+          <Box
+            sx={{
+              pointerEvents: "auto",
+              textAlign: "center",
+              px: { xs: 4, md: 6 },
+              py: { xs: 3.5, md: 4.5 },
+              borderRadius: 3,
+              position: "relative",
+              color: "#0a0a2e",
+              bgcolor: "rgba(255,255,255,0.85)",
+              backdropFilter: "blur(18px)",
+              border: "1px solid rgba(0,80,255,0.28)",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 0 rgba(0,80,255,0.35), 0 10px 0 rgba(0,80,255,0.18), 0 18px 0 rgba(0,80,255,0.09), 0 36px 70px rgba(0,80,255,0.35), 0 6px 18px rgba(10,10,46,0.25)",
+              transformStyle: "preserve-3d",
+              animation: "deploy3d 2.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards",
+              overflow: "hidden",
+            }}
+          >
+            {/* Halo lumineux tournant en arrière-plan de la carte */}
+            <Box
+              sx={{
+                position: "absolute",
+                inset: -2,
+                zIndex: -1,
+                borderRadius: 3,
+                background: "conic-gradient(from 0deg, rgba(0,80,255,0.5), rgba(0,191,255,0.15), rgba(0,80,255,0.5))",
+                filter: "blur(14px)",
+                opacity: 0.65,
+                animation: "haloSpin 3.2s linear infinite",
+              }}
+            />
+            {/* Fine bordure supérieure en dégradé façon "bord biseauté" 3D */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 3,
+                background: "linear-gradient(90deg, transparent, #0050FF, #00bfff, #0050FF, transparent)",
+                backgroundSize: "200% 100%",
+                animation: "wave 2s infinite linear",
+              }}
+            />
+            <Box
+              sx={{
+                display: "inline-flex",
+                color: "#0050FF",
+                mb: 1.5,
+                transformStyle: "preserve-3d",
+                animation: "iconFloat3d 2.6s ease-in-out infinite",
+                filter: "drop-shadow(0 12px 18px rgba(0,80,255,0.45))",
+              }}
+            >
               <RocketLaunch sx={{ fontSize: { xs: 46, md: 60 } }} />
             </Box>
-            <Typography variant="h5" fontWeight={800} fontFamily={FONT_HEADING} sx={{ letterSpacing: 0.5, background: "linear-gradient(135deg, #0a0a2e 0%, #0050FF 100%)", backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent" }}>{t.notDeployed}</Typography>
-            <Typography sx={{ mt: 1, color: "#555", fontSize: { xs: "0.82rem", md: "0.92rem" } }}>{t.notDeployedSub}</Typography>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              fontFamily={FONT_HEADING}
+              sx={{
+                letterSpacing: 0.5,
+                background: "linear-gradient(135deg, #0a0a2e 0%, #0050FF 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+                transform: "translateZ(20px)",
+              }}
+            >
+              {t.notDeployed}
+            </Typography>
+            <Typography sx={{ mt: 1, color: "#555", fontSize: { xs: "0.82rem", md: "0.92rem" }, transform: "translateZ(12px)" }}>
+              {t.notDeployedSub}
+            </Typography>
           </Box>
         </Box>
       )}
 
       <style>{`
         @keyframes deploy3d { 0% { opacity: 0; transform: rotateX(-70deg) translateY(60px) scale(0.7); } 18% { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); } 82% { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); } 100% { opacity: 0; transform: rotateX(60deg) translateY(-40px) scale(0.85); } }
+        @keyframes haloSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes iconFloat3d { 0%,100% { transform: rotateY(0deg) rotateX(0deg) translateZ(0) translateY(0); } 25% { transform: rotateY(22deg) rotateX(-8deg) translateZ(14px) translateY(-4px); } 50% { transform: rotateY(0deg) rotateX(10deg) translateZ(8px) translateY(-7px); } 75% { transform: rotateY(-22deg) rotateX(-6deg) translateZ(14px) translateY(-4px); } }
         @keyframes badge3d { 0%,100% { transform: rotateY(0deg) rotateX(0deg) translateZ(0); } 25% { transform: rotateY(24deg) rotateX(-12deg) translateZ(14px); } 50% { transform: rotateY(0deg) rotateX(10deg) translateZ(8px); } 75% { transform: rotateY(-24deg) rotateX(-8deg) translateZ(14px); } }
         @keyframes gradientShift { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
