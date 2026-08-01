@@ -186,10 +186,6 @@ function useOrientation() {
   return orientation;
 }
 
-/* ============================================================
-   NOUVEAUX COMPOSANTS UTILITAIRES — Animations & UX
-   ============================================================ */
-
 // Loader plein écran affiché au premier montage (logo LR animé)
 function PageLoader({ visible }: { visible: boolean }) {
   return (
@@ -1832,7 +1828,7 @@ export default function Accueil() {
                     <IconButton size="small" href="https://web.facebook.com/mariallucia.lucia.35?locale=fr_FR" target="_blank" sx={{ color: "#555", transition: "all 0.3s", "&:hover": { color: "#0050FF", transform: "translateY(-5px) scale(1.2)" } }}><Facebook /></IconButton>
                     <IconButton size="small" href="https://www.linkedin.com/in/lucia-rasoanirina/" target="_blank" sx={{ color: "#555", transition: "all 0.3s", "&:hover": { color: "#0050FF", transform: "translateY(-5px) scale(1.2)" } }}><LinkedIn /></IconButton>
                     <IconButton size="small" href="mailto:luciarasoanirina8@gmail.com" target="_blank" sx={{ color: "#555", transition: "all 0.3s", "&:hover": { color: "#0050FF", transform: "translateY(-5px) scale(1.2)" } }}><MailOutline /></IconButton>
-                    <IconButton size="small" href="https://wa.me/2613870236" target="_blank" sx={{ color: "#555", transition: "all 0.3s", "&:hover": { color: "#0050FF", transform: "translateY(-5px) scale(1.2)" } }}><WhatsApp /></IconButton>
+                    <IconButton size="small" href="https://wa.me/261383970236" target="_blank" sx={{ color: "#555", transition: "all 0.3s", "&:hover": { color: "#0050FF", transform: "translateY(-5px) scale(1.2)" } }}><WhatsApp /></IconButton>
                   </Stack>
                 </Box>
               </Box>
