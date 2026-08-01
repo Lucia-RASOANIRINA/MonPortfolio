@@ -1506,9 +1506,9 @@ export default function Accueil() {
     { title: "OuraTable", category: "Web Platform", description: "OURATABLE is a recipe-sharing social network where users can publish recipes, engage with the community, participate in AI-generated cooking challenges, and vote for the weekly recipe. Features include private messaging, discussion groups, likes system, and full admin dashboard with user management, and announcements. The Art of Good Eating — Culinary community platform built with Laravel 9.", images: ["/ouratable_1.png", "/ouratable_2.png", "/ouratable_3.png", "/ouratable_4.png"], tags: ["Laravel", "MySQL", "Vue.js"], github: "https://github.com/Lucia-RASOANIRINA/OuraTable", demo: "https://ouratable.onrender.com/" },
     { title: "Garage Pro", category: "Web App", description: "Comprehensive web application for automotive garage operations management.", images: ["/garageJSlocalStorage_1.png", "/garageJSlocalStorage_2.png", "/garageJSlocalStorage_3.png", "/garageJSlocalStorage_4.png"], tags: ["HTML5", "CSS3", "JavaScript"], github: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html", demo: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html" },
     { title: "Packet Love Destiny", category: "Mini Game", description: "Interactive mini game developed with Python Tkinter.", images: ["/PokectLoveDestiny.png"], tags: ["Python", "Tkinter", "tkcalendar"], github: "https://github.com/Lucia-RASOANIRINA/Pocket-_Love-_Destiny", demo: "#" },
-    { title: "'Parentia", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Axios"], github: "#", githubFront: "https://github.com/Lucia-RASOANIRINA/Parentia_Frontend", githubBack: "https://github.com/Lucia-RASOANIRINA/Parentia_Backend", demo: "https://parentia-ten.vercel.app/" },
-    { title: "Portfolio", category: "Creative", description: "Interactive 3D portfolio website built with Three.js, featuring animated 3D models, smooth transitions, and an immersive user experience with parallax effects.", images: ["/portfolio_1.png", "/portfolio_2.png", "/portfolio_3.png", "/portfolio_4.png"], tags: ["Three.js", "React", "WebGL", "3D"], github: "https://github.com/Lucia-RASOANIRINA/MonPortfolio", demo: "https://lucia-rasoanirina-portfolio.netlify.app/" },
-    { title: "FeedbackPro", category: "Mobile App", description: "Completely anonymous mobile feedback application for honest communication.", images: ["/feedbackPro_1.jpg", "/feedbackPro_2.jpg", "/feedbackPro_3.jpg", "/feedbackPro_4.jpg", "/feedbackPro_5.jpg"], tags: ["React Native", "Firebase", "Anonymous"], github: "https://github.com/Lucia-RASOANIRINA/FeedBackPro", demo: "https://lucia-rasoanirina.github.io/FeedBackPro/#/" },
+    { title: "'Parentia", category: "Web Platform", description: "Parent'Lien is a collaborative parenting platform connecting parents, educators and psychologists. It offers a social feed, events, shared resources and real-time discussions powered by WebSocket (STOMP/SockJS), built with Vue 3.", images: ["/parentia_1.png", "/parentia_2.png", "/parentia_3.png", "/parentia_4.png", "/parentia_5.png"], tags: ["Vue 3", "Vite", "WebSocket", "Spring Boot", "PostgreSQL"], github: "#", githubFront: "https://github.com/Lucia-RASOANIRINA/Parentia_Frontend", githubBack: "https://github.com/Lucia-RASOANIRINA/Parentia_Backend", demo: "https://parentia-ten.vercel.app/" },
+    { title: "Portfolio", category: "Creative", description: "Interactive 3D portfolio website built with Three.js, featuring animated 3D models, smooth transitions, and an immersive user experience with parallax effects.", images: ["/portfolio_1.png", "/portfolio_2.png", "/portfolio_3.png", "/portfolio_4.png"], tags: ["TypeScript", "React", "WebGL"], github: "https://github.com/Lucia-RASOANIRINA/MonPortfolio", demo: "https://lucia-rasoanirina-portfolio.netlify.app/" },
+    { title: "FeedbackPro", category: "Mobile App", description: "Completely anonymous mobile feedback application for honest communication.", images: ["/feedbackPro_1.jpg", "/feedbackPro_2.jpg", "/feedbackPro_3.jpg", "/feedbackPro_4.jpg", "/feedbackPro_5.jpg"], tags: ["Flutter", "Supabase", "Anonymous"], github: "https://github.com/Lucia-RASOANIRINA/FeedBackPro", demo: "https://lucia-rasoanirina.github.io/FeedBackPro/#/" },
   ];
 
   const openProjectModal = (images: string[], idx: number = 0) => { setModalImages(images); setModalCurrentIndex(idx); setModalOpen(true); };
@@ -2102,7 +2102,7 @@ export default function Accueil() {
                             <Typography variant="h6" fontWeight={800} fontFamily={FONT_HEADING} color="#000" gutterBottom>{project.title}</Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: "0.85rem" }}>{isProjectOpen ? project.description : shortDescription}</Typography>
                             <Stack direction="row" flexWrap="wrap" gap={0.8}>
-                              {project.tags.slice(0, 3).map((tag) => (
+                              {project.tags.slice(0, 5).map((tag) => (
                                 <Box key={tag} onClick={(e) => { e.stopPropagation(); vibrate(10); setActiveCategory(project.category); scrollToSection("projects"); }} title={`Voir les projets « ${project.category} »`} sx={{ bgcolor: "rgba(0,80,255,0.1)", px: 1.5, py: 0.5, borderRadius: 20, fontSize: 12, fontWeight: 600, color: "#0050FF", cursor: "pointer", transition: "all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)", touchAction: "manipulation", "&:hover": { bgcolor: "#0050FF", color: "#fff", transform: "scale(1.05)" } }}>
                                   {tag}
                                 </Box>
@@ -2180,7 +2180,7 @@ export default function Accueil() {
                     {[
                       { icon: <LocationOn />, label: t.headOffice, lines: ["Ankofafalahy, Fianarantsoa, Madagascar"] },
                       { icon: <AlternateEmail />, label: t.emailUs, lines: ["luciarasoanirina8@gmail.com"] },
-                      { icon: <Phone />, label: t.callUs, lines: ["+261 38 702 36"] },
+                      { icon: <Phone />, label: t.callUs, lines: ["+261 38 39 702 36"] },
                       { icon: <CheckCircle />, label: t.available, lines: [] },
                     ].map((item, i) => (
                       <Stack key={i} direction="row" spacing={2} alignItems="flex-start" sx={{ transition: "0.2s ease", "&:hover": { transform: "translateX(4px)" } }}>
@@ -2450,11 +2450,11 @@ export default function Accueil() {
                   <Typography
                     variant="body2"
                     component="a"
-                    href="https://wa.me/2613870236"
+                    href="https://wa.me/261383970236"
                     target="_blank"
                     sx={{ color: "#ccc", fontSize: { xs: "0.8rem", sm: "0.875rem" }, textDecoration: "none", transition: "0.2s ease", "&:hover": { color: "#0050FF" } }}
                   >
-                    +261 38 702 36
+                    +261 38 39 702 36
                   </Typography>
                 </Stack>
                 <Typography

@@ -289,7 +289,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               <Stack direction="row" flexWrap="wrap" columnGap={2.5} rowGap={0.6}>
                 <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Naissance</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>17/10/2005</Typography></Box>
                 <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Lieu</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Ankofafa, Fianarantsoa</Typography></Box>
-                <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Nationalite</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Malgache</Typography></Box>
+                <Box><Typography sx={{ fontSize: { xs: "0.55rem", sm: "0.6rem" }, color: "#888" }}>Nationalite</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Malagasy</Typography></Box>
               </Stack>
             </SectionBlock>
 
@@ -309,10 +309,12 @@ export default function CvLivre({ onClose }: CvLivreProps) {
             </SectionBlock>
 
             <SectionBlock>
-              <SectionTitle>Certificats</SectionTitle>
+              <SectionTitle>Certificats et Attestations</SectionTitle>
               <Stack spacing={0.6}>
-                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certification PIX</Typography></Stack>
-                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certificat en Bureautique</Typography></Stack>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certification Participation en Hackathon</Typography></Stack>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Certificat en Informatique Bureautique</Typography></Stack>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Attestation de stage 2 mois</Typography></Stack>
+                <Stack direction="row" spacing={1} alignItems="center"><CheckCircle sx={{ fontSize: 14, color: "#0050FF" }} /><Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#333" }}>Attestation Pix</Typography></Stack>
               </Stack>
             </SectionBlock>
           </Stack>
@@ -332,23 +334,15 @@ export default function CvLivre({ onClose }: CvLivreProps) {
               </Box>
             </SectionBlock>
 
-            <SectionBlock>
-              <SectionTitle>Centres d'interet</SectionTitle>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                {["Cinema", "Series", "Tele-realite", "Basket-ball", "Cuisine", "Sport"].map((item) => (
-                  <Box key={item} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: 1, py: 0.35, borderRadius: 20, fontSize: { xs: "0.58rem", sm: "0.64rem" }, fontWeight: 500 }}>{item}</Box>
-                ))}
-              </Box>
-            </SectionBlock>
-
             <SectionBlock tint={false}>
               <SectionTitle>Competences Techniques</SectionTitle>
               <Grid container spacing={1}>
                 {[
                   { t: "Frontend", items: ["React.js", "Vue.js", "Next.js", "TypeScript", "Tailwind CSS"] },
                   { t: "Backend", items: ["PHP / Laravel", "Node.js", "Python", "NestJS"] },
+                  { t: "Mobile", items: ["Flutter"] },
                   { t: "Base de donnees", items: ["MySQL", "PostgreSQL", "MongoDB"] },
-                  { t: "Outils", items: ["Git", "Figma", "Netlify", "Supabase"] },
+                  { t: "Outils", items: ["Git", "Figma", "Netlify", "Supabase", "Neon", "Vercel", "Render"] },
                 ].map((g) => (
                   <Grid key={g.t} size={{ xs: 12, sm: 6 }}>
                     <Stack spacing={0.4}>
@@ -362,6 +356,15 @@ export default function CvLivre({ onClose }: CvLivreProps) {
                   </Grid>
                 ))}
               </Grid>
+            </SectionBlock>
+
+            <SectionBlock>
+              <SectionTitle>Centres d'interet</SectionTitle>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                {["Cinema", "Series", "Tele-realite", "Basket-ball", "Cuisine", "Sport"].map((item) => (
+                  <Box key={item} sx={{ bgcolor: "rgba(0,80,255,0.08)", color: "#0050FF", px: 1, py: 0.35, borderRadius: 20, fontSize: { xs: "0.58rem", sm: "0.64rem" }, fontWeight: 500 }}>{item}</Box>
+                ))}
+              </Box>
             </SectionBlock>
           </Stack>
         </Box>
@@ -380,8 +383,9 @@ export default function CvLivre({ onClose }: CvLivreProps) {
                 {[
                   { n: "UltimateChild", d: "Site vitrine educatif", t: ["HTML5", "CSS3", "JavaScript"] },
                   { n: "Garage Pro", d: "Gestion de garage", t: ["HTML5", "CSS3", "JavaScript"] },
-                  { n: "Parent'Lien", d: "Plateforme parentale (Vue 3)", t: ["Vue 3", "Vite", "WebSocket"] },
-                  { n: "UrbanFlow IA", d: "Hackathon - mobilité urbaine IA", t: ["React", "Node.js", "Python"] },
+                  { n: "'Parentia", d: "Plateforme parentale ", t: ["Vue 3", "Vite", "WebSocket", "Spring Boot", "PostgreSQL"] },
+                  { n: "UrbanFlow IA", d: "Hackathon - mobilité urbaine IA", t: ["React", "Node.js", "Python", "Flutter"] },
+                  { n: "Fianar Smart City", d: "Plateforme citoyenne pour la ville de Fianarantsoa :signalements urbain,IA de priorisation automatique", t: ["Next.js", "Nest.js", "PostgreSQL"] },
                   { n: "OuraTable", d: "Réseau social culinaire Laravel", t: ["Laravel", "MySQL", "Vue.js"] },
                   { n: "Packet Love Destiny", d: "Jeu interactif Python Tkinter", t: ["Python", "Tkinter"] },
                   { n: "Portfolio 3D", d: "Portfolio interactif Three.js", t: ["Three.js", "React", "WebGL"] },
@@ -401,8 +405,11 @@ export default function CvLivre({ onClose }: CvLivreProps) {
                 ))}
               </Grid>
             </SectionBlock>
+          </Stack>
+        </Box>
 
-            <SectionBlock>
+        <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 1.5, sm: 2, md: 3 }, bgcolor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", gap: 1.2 }}>
+          <SectionBlock>
               <SectionTitle>Experiences</SectionTitle>
               <Stack spacing={0.8}>
                 <Typography sx={{ fontSize: { xs: "0.66rem", sm: "0.72rem" }, color: "#444", lineHeight: 1.5 }}>
@@ -417,16 +424,13 @@ export default function CvLivre({ onClose }: CvLivreProps) {
                   </Typography>
                 </Box>
               </Stack>
-            </SectionBlock>
-          </Stack>
-        </Box>
+          </SectionBlock>
 
-        <Box sx={{ width: { xs: "100%", md: "50%" }, p: { xs: 1.5, sm: 2, md: 3 }, bgcolor: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "center", gap: 1.2 }}>
           <SectionBlock tint={false}>
             <SectionTitle>Contact</SectionTitle>
             <Stack spacing={1.2}>
               <Stack direction="row" spacing={1.5} alignItems="center"><Email sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Email</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>luciarasoanirina8@gmail.com</Typography></Box></Stack>
-              <Stack direction="row" spacing={1.5} alignItems="center"><Phone sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Telephone</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>+261 38 702 36</Typography></Box></Stack>
+              <Stack direction="row" spacing={1.5} alignItems="center"><Phone sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Telephone</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>+261 38 39 702 36</Typography></Box></Stack>
               <Stack direction="row" spacing={1.5} alignItems="center"><LocationOn sx={{ color: "#0050FF", fontSize: 20 }} /><Box><Typography sx={{ fontSize: "0.58rem", color: "#888" }}>Localisation</Typography><Typography sx={{ fontSize: { xs: "0.68rem", sm: "0.74rem" }, color: "#333", fontWeight: 500 }}>Fianarantsoa, Madagascar</Typography></Box></Stack>
             </Stack>
           </SectionBlock>
@@ -503,7 +507,7 @@ export default function CvLivre({ onClose }: CvLivreProps) {
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
             <Phone sx={{ color: "#0050FF", fontSize: 18 }} />
-            <Typography sx={{ fontSize: { xs: "0.7rem", md: "0.78rem" }, color: "#333" }}>+261 38 702 36</Typography>
+            <Typography sx={{ fontSize: { xs: "0.7rem", md: "0.78rem" }, color: "#333" }}>+261 38 39 702 36</Typography>
           </Stack>
         </Stack>
 
