@@ -235,45 +235,6 @@ function PageLoader({ visible }: { visible: boolean }) {
   );
 }
 
-// Barre de progression de lecture (scroll global de la page)
-function ReadingProgressBar() {
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const onScroll = () => {
-      const h = document.documentElement;
-      const scrollable = h.scrollHeight - h.clientHeight;
-      setProgress(scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: HEADER_HEIGHT,
-        left: 0,
-        width: "100%",
-        height: 3,
-        zIndex: 99,
-        bgcolor: "transparent",
-        pointerEvents: "none",
-      }}
-    >
-      <Box
-        sx={{
-          height: "100%",
-          width: `${progress}%`,
-          background: "linear-gradient(90deg, #0050FF, #00bfff)",
-          transition: "width 0.1s linear",
-          boxShadow: "0 0 8px rgba(0,80,255,0.6)",
-        }}
-      />
-    </Box>
-  );
-}
-
 // Points de navigation latérale (desktop uniquement)
 function SideNavDots({
   items,
@@ -1163,12 +1124,12 @@ export default function Accueil() {
   const TR = {
     en: {
       nav: { about: "ABOUT", connaissances: "KNOWLEDGE", competences: "SKILLS", projects: "PROJECTS", contact: "CONTACT" },
-      role: "FULLSTACK DEV",
+      role: "FULLSTACK & MOBILE DEV",
       openToWork: "OPEN TO WORK",
       hello: "Hello",
       whoami: "// Who I am & what I do",
       downloadCv: "Download CV",
-      about: "I entered the world of technology in 2023 as a first-year student in intranet and internet application development. I started my career as a Junior Full-Stack Developer, driven by continuous learning and a strong passion for building modern digital solutions.",
+      about: "I entered the world of technology in 2023 as a first-year student in intranet and internet application development. I started my career as a Junior Full-Stack Developer, then worked as a mobile developer (Flutter) during a 3-month internship at LovaTech (August - October 2026), where I also discovered DevOps (Docker, GitHub Actions, DirectAdmin, o2switch). I am driven by continuous learning and a strong passion for building modern digital solutions.",
       knowledgeTitle: "Knowledge & Academic Background",
       knowledgeSubtitle: "My technical knowledge acquired during my studies and personal projects",
       groupProjects: "Group Projects",
@@ -1211,12 +1172,12 @@ export default function Accueil() {
     },
     fr: {
       nav: { about: "À PROPOS", connaissances: "CONNAISSANCES", competences: "COMPÉTENCES", projects: "PROJETS", contact: "CONTACT" },
-      role: "DÉVELOPPEUSE FULLSTACK",
+      role: "DÉVELOPPEUSE FULLSTACK & MOBILE",
       openToWork: "DISPONIBLE",
       hello: "Bonjour",
       whoami: "// Qui je suis & ce que je fais",
       downloadCv: "Télécharger le CV",
-      about: "Je suis entrée dans le monde de la technologie en 2023, en première année de développement d'applications intranet et internet. J'ai débuté ma carrière comme développeuse Full-Stack junior, animée par un apprentissage continu et une forte passion pour la création de solutions numériques modernes.",
+      about: "Je suis entrée dans le monde de la technologie en 2023, en première année de développement d'applications intranet et internet. J'ai débuté ma carrière comme développeuse Full-Stack junior, puis j'ai travaillé comme développeuse mobile (Flutter) lors d'un stage de 3 mois chez LovaTech (août - octobre 2026), où j'ai aussi découvert le DevOps (Docker, GitHub Actions, DirectAdmin, o2switch). Je suis animée par un apprentissage continu et une forte passion pour la création de solutions numériques modernes.",
       knowledgeTitle: "Connaissances & Parcours Académique",
       knowledgeSubtitle: "Mes connaissances techniques acquises durant mes études et mes projets personnels",
       groupProjects: "Projets de Groupe",
@@ -1446,7 +1407,7 @@ export default function Accueil() {
     { name: "MySQL / PostgreSQL", icon: <FaDatabase />, detail: "Complex queries, optimization, indexing, transactions, database design, migrations.", category: "Database", level: "Advanced" },
     { name: "MongoDB", icon: <SiMongodb />, detail: "NoSQL database, aggregation pipelines, indexing, sharding, replica sets, CRUD operations.", category: "Database", level: "Intermediate" },
     { name: "Neon", icon: <Storage sx={{ color: "#0050FF" }} />, detail: "Serverless PostgreSQL platform, instant provisioning, database branching, autoscaling, connection pooling.", category: "Database", level: "Intermediate" },
-    { name: "Flutter", icon: <SiFlutter />, detail: "Cross-platform mobile development, Dart programming, widgets, state management, animations, Firebase integration.", category: "Mobile Development", level: "Beginner" },
+    { name: "Flutter", icon: <SiFlutter />, detail: "Mobile developer: cross-platform apps with Dart, state management (Riverpod, Provider), GoRouter, offline-first with SQLite/Drift and sync queues, maps (OpenStreetMap), camera, PDF, secure storage, i18n (French/Malagasy). Two production apps built during my internship at LovaTech.", category: "Mobile Development", level: "Intermediate" },
     { name: "Supabase", icon: <SiSupabase />, detail: "Open-source Firebase alternative, PostgreSQL database, real-time subscriptions, authentication, storage, edge functions.", category: "Backend as a Service", level: "Intermediate" },
     { name: "Netlify", icon: <SiNetlify />, detail: "Continuous deployment, serverless functions, form handling, split testing, analytics, edge CDN.", category: "Deployment & Hosting", level: "Advanced" },
     { name: "Vercel", icon: <SiVercel />, detail: "Serverless deployment platform, edge functions, automatic CI/CD, preview deployments, global CDN, framework-aware builds.", category: "Deployment & Hosting", level: "Advanced" },
@@ -1462,8 +1423,9 @@ export default function Accueil() {
     { name: "Django / FastAPI", icon: <SiDjango />, detail: "Python web frameworks, ORM, REST APIs, async endpoints, automatic documentation, authentication.", category: "Backend", level: "Intermediate" },
     { name: "React Native", icon: <FaReact />, detail: "Cross-platform mobile apps, native components, navigation, Firebase integration, push notifications, app deployment.", category: "Mobile Development", level: "Intermediate" },
     { name: "Microservices & API Design", icon: <Hub sx={{ color: "#0050FF" }} />, detail: "Service decomposition, REST & gRPC, API gateways, message queues, service discovery, scalable architectures.", category: "Software Architecture", level: "Intermediate" },
-    { name: "Docker / Kubernetes", icon: <SiDocker />, detail: "Containerization, images, Docker Compose, orchestration, pods, deployments, scaling, container networking.", category: "DevOps & Cloud", level: "Intermediate" },
-    { name: "CI/CD Pipelines", icon: <SiGithubactions />, detail: "GitLab CI/CD, GitHub Actions, automated testing, build & deployment pipelines, DevSecOps practices.", category: "DevOps & Cloud", level: "Intermediate" },
+    { name: "Docker", icon: <SiDocker />, detail: "Containerization, images, Dockerfile, Docker Compose for local services (MariaDB, Redis), used during my internship at LovaTech.", category: "DevOps & Cloud", level: "Beginner" },
+    { name: "GitHub Actions (CI/CD)", icon: <SiGithubactions />, detail: "Workflows for automated testing, builds and deployments, used during my internship at LovaTech.", category: "DevOps & Cloud", level: "Beginner" },
+    { name: "DirectAdmin / o2switch", icon: <Cloud sx={{ color: "#0050FF" }} />, detail: "Shared hosting administration (DirectAdmin, o2switch cPanel): deploying Laravel and Node.js APIs, MySQL databases, SSH access and tunnels, environment configuration. Learned during my internship at LovaTech.", category: "Deployment & Hosting", level: "Beginner" },
     { name: "Cloud (AWS / Azure / GCP)", icon: <SiAmazon />, detail: "Cloud computing, compute & storage services, serverless functions, distributed infrastructures, IaaS & PaaS.", category: "DevOps & Cloud", level: "Beginner" },
     { name: "Redis / Elasticsearch", icon: <SiRedis />, detail: "In-memory caching, key-value store, pub/sub, full-text search, indexing, real-time analytics.", category: "Database", level: "Beginner" },
     { name: "TensorFlow / PyTorch", icon: <SiTensorflow />, detail: "Deep learning frameworks, neural networks, model training, Scikit-Learn, machine learning pipelines.", category: "AI & Machine Learning", level: "Beginner" },
@@ -1477,8 +1439,11 @@ export default function Accueil() {
 
   const groupProjects = [
     { name: "C++ with Arduino - Smart Bin", icon: <Sensors sx={{ fontSize: 40 }} />, shortDesc: "Smart bin that automatically opens using an ultrasonic sensor.", category: "IoT / Embedded", technologies: ["C++", "Arduino", "Ultrasonic Sensor", "Servo Motor"], fullDetail: "Student group project: Development of a smart bin prototype. The ultrasonic sensor detects user presence and automatically opens the lid. The system includes fill-level monitoring, servo motor control, and LED indicators for waste level status." },
-    { name: "Fianara Smart City", icon: <Psychology sx={{ fontSize: 40 }} />, shortDesc: "Innovative smart city solution developed during a Hackathon.", category: "Hackathon", technologies: ["Next.js", "NestJS", "Tailwind CSS"], fullDetail: "During a 48-hour hackathon, our team designed an integrated smart city solution using Next.js for the frontend, NestJS for the backend API, and Tailwind CSS for styling. Features include real-time traffic management, smart parking, waste collection optimization, and public lighting control with data visualization dashboards." },
-    { name: "UrbanFlow IA", icon: <Sensors sx={{ fontSize: 40 }} />, shortDesc: "AI-powered urban traffic & mobility management built during a Hackathon.", category: "Hackathon", technologies: ["React", "Node.js", "Python", "AI"], fullDetail: "UrbanFlow IA is an intelligent urban mobility platform developed during a hackathon. It combines a React dashboard, a Node.js backend and a Python AI microservice to analyze traffic in real time, predict congestion, and optimize traffic-light control and route planning for smarter, smoother cities." },
+    { name: "Fianara Smart City", icon: <Psychology sx={{ fontSize: 40 }} />, shortDesc: "Innovative smart city solution developed during the Youth Computing hackathon.", category: "Hackathon", technologies: ["Next.js", "NestJS", "Tailwind CSS"], fullDetail: "During a 48-hour hackathon organized by Youth Computing, our team designed an integrated smart city solution using Next.js for the frontend, NestJS for the backend API, and Tailwind CSS for styling. Features include real-time traffic management, smart parking, waste collection optimization, and public lighting control with data visualization dashboards." },
+    { name: "UrbanFlow IA", icon: <Sensors sx={{ fontSize: 40 }} />, shortDesc: "AI-powered urban traffic copilot for Fianarantsoa built during the EMIHACK hackathon.", category: "Hackathon", technologies: ["Flutter", "React", "Node.js", "Python", "AI"], fullDetail: "UrbanFlow IA is an intelligent urban mobility solution developed during the EMIHACK hackathon for the real city of Fianarantsoa. A native Android app (Flutter + OpenStreetMap) shows congestion in real time, predicts traffic 10/30/60 minutes ahead, offers a French voice AI copilot and an 'Escape' mode for blocked drivers, plus citizen incident reporting. A web version combines a React dashboard, a Node.js backend and a Python AI microservice." },
+    { name: "Mianara", icon: <Psychology sx={{ fontSize: 40 }} />, shortDesc: "Baccalaureate digitalization with QR anti-fraud, group project at Science Hack Day.", category: "Hackathon", technologies: ["Flutter", "SQLite", "Next.js", "PostgreSQL"], fullDetail: "Team project presented at Science Hack Day Madagascar. Mianara digitalizes the whole Baccalaureate cycle, from registration to diploma, with signed QR codes against fraud. The mobile side includes an offline-first scanning app for supervisors and a candidate app with encrypted local storage, revision tracking, background synchronization and French/Malagasy interface." },
+    { name: "MASO", icon: <Security sx={{ fontSize: 40 }} />, shortDesc: "Fact-checking platform for Malagasy journalists, built at Hackathon FANILO 2026.", category: "Hackathon", technologies: ["React", "TypeScript", "Supabase", "FastAPI", "PWA"], fullDetail: "Team project at Hackathon FANILO 2026 (42 Antananarivo). MASO is an installable PWA and web platform that helps journalists verify suspicious content (images, links, videos, texts) with sourced clues, document a case file and publish a signed public report after a journalist / fact-checker / editor-in-chief validation workflow. Works offline, in French, Malagasy and English." },
+    { name: "Gestion EMIT", icon: <Hub sx={{ fontSize: 40 }} />, shortDesc: "Rooms, timetables and teacher availability management for EMIT.", category: "Academic", technologies: ["ASP.NET Core", "EF Core", "PostgreSQL", "React"], fullDetail: "Academic group project: a web application for EMIT that manages programs, courses, students, teachers, groups and rooms, builds timetables with automatic conflict detection (room, teacher, group, teacher availability) and offers role-based access (Admin, Secretariat, Teacher) with JWT." },
     { name: "AraFashion - E-commerce Design", icon: <DesignServices sx={{ fontSize: 40 }} />, shortDesc: "UI/UX design of a fashion e-commerce application.", category: "UI/UX Design", technologies: ["Figma", "Prototyping", "Design System"], fullDetail: "A collaborative UI/UX project where we designed a complete fashion e-commerce app from scratch. We created user personas, user journeys, wireframes, high-fidelity mockups, and an interactive prototype. The design system includes color palette, typography, components, and responsive layouts for mobile and desktop." },
   ];
 
@@ -1498,6 +1463,12 @@ export default function Accueil() {
   ];
 
   const projects: Project[] = [
+    { title: "MajiChrono", category: "Mobile App", description: "Internship project at LovaTech (Aug 3 - Oct 31, 2026) - On-demand delivery platform for Madagascar. A single Flutter app serving three profiles: senders (multi-step order creation, live map tracking, payment, rating, disputes), couriers (KYC, online/offline mode, navigation, photo proofs, signatures, PDF reports, earnings, SOS) and operations (KYC validation, fleet supervision, dispute arbitration). Offline-first with a local sync queue, French/Malagasy, light/dark themes. Backend: Laravel REST API on a shared MySQL/MariaDB database, deployed on DirectAdmin.", images: ["/majichrono_1.jpg", "/majichrono_2.jpg", "/majichrono_3.jpg", "/majichrono_4.jpg", "/majichrono_5.jpg"], tags: ["Flutter", "Riverpod", "Laravel", "MySQL", "DirectAdmin"], github: "https://github.com/Lucia-RASOANIRINA/MajiChrono_MySQL", demo: "#" },
+    { title: "AllGo", category: "Mobile App", description: "Internship project at LovaTech (Aug 3 - Oct 31, 2026) - Mobile port of the Janga Market social commerce platform (Mahajanga, Madagascar). Flutter app with a NestJS + Prisma API sharing the production MySQL database with the website: catalogue, shops and geolocation, cart, orders and payments (cash on delivery), courier flow, social feed, messaging, stories, campaigns, reviews, moderation and notifications. Docker (MariaDB, Redis) for local development, API deployed on o2switch (cPanel Node.js).", images: ["/allgo_1.png"], tags: ["Flutter", "NestJS", "Prisma", "MySQL", "Docker"], github: "https://github.com/Lucia-RASOANIRINA/AllGo", demo: "#" },
+    { title: "MASO", category: "Web Platform", description: "Group project - Hackathon FANILO 2026 (42 Antananarivo). Installable PWA and web platform helping Malagasy journalists verify suspicious content: image analysis (hashes, EXIF metadata, C2PA provenance, ELA recompression, reverse search, AI indicator), link and video analysis, case files with evidence and sources, journalist → fact-checker → editor-in-chief workflow, signed public reports with QR verification. Offline mode, French/Malagasy/English. The tool gives clues, professionals decide.", images: ["/maso_1.jpg", "/maso_2.jpg", "/maso_3.jpg", "/maso_4.jpg", "/maso_5.jpg"], tags: ["React", "TypeScript", "Supabase", "FastAPI", "PWA"], github: "https://github.com/TolotraDev/42hackathon-fanilo2026-maso", demo: "https://42hackathon-fanilo2026-maso.vercel.app" },
+    { title: "Mianara", category: "Mobile App", description: "Group project - Science Hack Day Madagascar. Digitalization of the Malagasy Baccalaureate cycle with QR-code anti-fraud control. Mianara Scan: offline-first Android app for exam supervisors (attendance, exit/return, end of exam, fraud reporting) with timestamped events in SQLite. Mianara Mobile: candidate app with encrypted local storage (SQLCipher), administrative checklist, revision sessions with weekly goals, background sync (WorkManager), learning catalogue, Orange Money payments and tutoring chat, in French and Malagasy.", images: ["/mianara_1.png", "/mianara_2.png", "/mianara_3.png"], tags: ["Flutter", "SQLite / SQLCipher", "Next.js API", "PostgreSQL", "Offline-first"], github: "https://github.com/Lucia-RASOANIRINA/Mianara_Mobile_Surveillant-", demo: "#" },
+    { title: "UrbanFlow AI", category: "Mobile App", description: "EMIHACK hackathon project - Urban traffic copilot for the real city of Fianarantsoa. Native Android app on an OpenStreetMap map: roads colored by congestion, traffic simulator, French voice AI copilot (speech-to-text + text-to-speech), 10/30/60 min congestion prediction, incident simulation, 'Escape' mode suggesting alternatives when blocked, citizen incident reporting, regulator dashboard and A/B/C routes from the user's real GPS position. A web version (React, Node.js, Python FastAPI AI service) was also built.", images: ["/urbanflow_1.jpg", "/urbanflow_2.jpg", "/urbanflow_3.jpg", "/urbanflow_4.jpg"], tags: ["Flutter", "OpenStreetMap", "Voice AI", "React", "FastAPI"], github: "#", demo: "#" },
+    { title: "Gestion EMIT", category: "Web App", description: "Academic group project - Management of rooms, timetables and teacher availability for EMIT (University of Fianarantsoa): programs, levels, courses, students, teachers, groups, rooms and buildings; timetable by group, teacher or room with automatic conflict detection (room, teacher, group, availability); academic years, dashboard with statistics, teacher space. Layered ASP.NET Core Web API with Entity Framework Core, JWT roles (Admin, Secretariat, Teacher), Swagger documentation and a React frontend.", images: ["/gestion_emit_1.jpg"], tags: ["ASP.NET Core", "C#", "EF Core", "PostgreSQL", "React"], github: "#", demo: "#" },
     { title: "UltimateChild", category: "Website", description: "Ultimate Child Education Center - A one-page showcase website for an educational center combining playful design with interactive user experience.", images: ["/CentreEducation_1.png", "/CentreEducation_2.png", "/CentreEducation_3.png", "/CentreEducation_4.png", "/CentreEducation_5.png"], tags: ["HTML5", "CSS3", "JavaScript"], github: "https://github.com/Lucia-RASOANIRINA/site_education", demo: "https://helpful-mermaid-acb3d1.netlify.app" },
     { title: "OuraTable", category: "Web Platform", description: "OURATABLE is a recipe-sharing social network where users can publish recipes, engage with the community, participate in AI-generated cooking challenges, and vote for the weekly recipe. Features include private messaging, discussion groups, likes system, and full admin dashboard with user management, and announcements. The Art of Good Eating — Culinary community platform built with Laravel 9.", images: ["/ouratable_1.png", "/ouratable_2.png", "/ouratable_3.png", "/ouratable_4.png"], tags: ["Laravel", "MySQL", "Vue.js"], github: "https://github.com/Lucia-RASOANIRINA/OuraTable", demo: "https://ouratable.onrender.com/" },
     { title: "Garage Pro", category: "Web App", description: "Comprehensive web application for automotive garage operations management.", images: ["/garageJSlocalStorage_1.png", "/garageJSlocalStorage_2.png", "/garageJSlocalStorage_3.png", "/garageJSlocalStorage_4.png"], tags: ["HTML5", "CSS3", "JavaScript"], github: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html", demo: "https://lucia-rasoanirina.github.io/GarageJsLocalStorage/login.html" },
@@ -1641,7 +1612,6 @@ export default function Accueil() {
   return (
     <Box minHeight="100vh" bgcolor="#ffffff" position="relative" sx={{ overflowX: "hidden", fontFamily: FONT_BODY }}>
       <PageLoader visible={pageLoading} />
-      <ReadingProgressBar />
       <SideNavDots items={menuItems} activeSection={activeSection} onSelect={scrollToSection} />
 
       <Box sx={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0,
@@ -1820,7 +1790,7 @@ export default function Accueil() {
                   <Box sx={{ width: 60, height: 3, bgcolor: "#0050FF", mx: "auto", my: 2, borderRadius: 2 }} />
                   {/* Typing effect */}
                   <Typography fontSize={14} letterSpacing={2} fontWeight={500} color="#444" fontFamily={FONT_MONO} sx={{ minHeight: 20 }}>
-                    <TypingText text="FULLSTACK DEVELOPER" />
+                    <TypingText text="FULLSTACK & MOBILE DEVELOPER" />
                   </Typography>
                 </Box>
                 <Box bgcolor="rgba(255,255,255,0.8)" py={1.5} sx={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
@@ -2633,7 +2603,7 @@ export default function Accueil() {
         @keyframes spinSlow { 0% { transform: rotate(45deg); } 100% { transform: rotate(405deg); } }
         @keyframes pulseGreen { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.8; } }
         @keyframes ripple { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.5); opacity: 0; } }
-        @keyframes starFloat { 0% { transform: translate(0,0) rotate(0deg) scale(0.85); opacity: 0.12; } 50% { transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(180deg) scale(1.3); opacity: 0.5; } 100% { transform: translate(0,0) rotate(360deg) scale(0.85); opacity: 0.12; } }
+        @keyframes starFloat { 0% { transform: translate(0,0) rotate(0deg) scale(0.85); opacity: 0.06; } 50% { transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(180deg) scale(1.3); opacity: 0.22; } 100% { transform: translate(0,0) rotate(360deg) scale(0.85); opacity: 0.06; } }
         @keyframes wave { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
         @keyframes loaderPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         @keyframes loaderBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }

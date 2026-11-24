@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>CV Lucia Rasoanirina</title>
+<style>
+  /* Format mémoire : A4, Times New Roman, contenu 12 pt, titres 14 pt max, interligne 1,5, fond blanc */
+  @page { size: A4; margin: 20mm 20mm 18mm 20mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.5; color: #000000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; padding-bottom: 3mm; border-bottom: 1pt solid #000000; margin-bottom: 4mm; }
+  header img { width: 28mm; height: 28mm; object-fit: cover; border-radius: 50%; }
+  .name { font-size: 14pt; font-weight: bold; letter-spacing: 1pt; }
+  .role { font-size: 12pt; font-weight: bold; color: #0040a8; }
+
+  h2 { font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #0040a8; border-bottom: 0.5pt solid #9fb4dd; margin: 4mm 0 1.5mm; break-after: avoid; }
+  .entry { break-inside: avoid; margin-bottom: 1.5mm; }
+  .head { display: flex; justify-content: space-between; gap: 4mm; }
+  .head b { font-size: 12pt; }
+  .date { white-space: nowrap; }
+  .sub { font-style: italic; }
+  ul { padding-left: 6mm; }
+  .stack { font-style: italic; }
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="name">LUCIA RASOANIRINA</div>
+      <div class="role">Développeuse Full-Stack &amp; Mobile</div>
+      <div>Ankofafa, Fianarantsoa, Madagascar · Née le 17/10/2005</div>
+      <div>+261 38 39 702 36 · luciarasoanirina8@gmail.com</div>
+      <div>github.com/Lucia-RASOANIRINA · lucia-rasoanirina-portfolio.netlify.app</div>
+    </div>
+    <img src="../public/photo-lucia.jpg" alt="Photo de Lucia Rasoanirina">
+  </header>
+
+  <h2>Profil</h2>
+  <p>Développeuse Full-Stack et mobile (Flutter), entrée dans le monde de la technologie en 2023. Stage de trois mois chez LovaTech : deux applications mobiles réalisées et premiers pas en DevOps.</p>
+
+  <h2>Formation</h2>
+  <div class="entry">
+    <div class="head"><b>Licence en Développement d'Applications (3e année)</b><span class="date">2023 – présent</span></div>
+    <div class="sub">EMIT, Université de Fianarantsoa</div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Formation Linux Essentials</b></div>
+    <div class="sub">Bases du système Linux et de la ligne de commande</div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Baccalauréat série C</b><span class="date">2023</span></div>
+    <div class="sub">Lycée FMJ, Talatamaty, Fianarantsoa</div>
+  </div>
+
+  <h2>Expériences professionnelles</h2>
+  <div class="entry">
+    <div class="head"><b>Stage – Développeuse mobile Flutter, LovaTech</b><span class="date">03/08/2026 – 31/10/2026</span></div>
+    <ul>
+      <li><b>MajiChrono</b> : application de livraison à la demande (profils client, livreur et administration), suivi cartographique, preuves photo, signatures, mode hors ligne. <span class="stack">Flutter, Riverpod, Laravel, MySQL.</span></li>
+      <li><b>AllGo</b> : version mobile de la plateforme de commerce social Janga Market. <span class="stack">Flutter, NestJS, Prisma, MySQL, Redis.</span></li>
+      <li>Initiation au DevOps : Docker, GitHub Actions, déploiement sur DirectAdmin et o2switch.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Stage de L2 – Développeuse full-stack</b><span class="date">2 mois</span></div>
+    <div>Application de gestion d'une maison de production audio.</div>
+  </div>
+
+  <h2>Hackathons et projets de groupe</h2>
+  <div class="entry">
+    <div class="head"><b>MASO</b><span class="date">Hackathon FANILO 2026</span></div>
+    <div>Plateforme web et PWA d'aide à la vérification de contenus pour les journalistes. <span class="stack">React, Supabase, FastAPI.</span></div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Mianara</b><span class="date">Science Hack Day</span></div>
+    <div>Digitalisation du Baccalauréat avec contrôle anti-fraude par QR code. <span class="stack">Flutter, SQLite, Next.js.</span></div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Fianar Smart City</b><span class="date">Hackathon Youth Computing</span></div>
+    <div>Plateforme citoyenne de signalements urbains avec IA de priorisation. <span class="stack">Next.js, NestJS, PostgreSQL.</span></div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>UrbanFlow IA</b><span class="date">Hackathon EMIHACK</span></div>
+    <div>Copilote de trafic urbain avec IA pour Fianarantsoa. <span class="stack">Flutter, OpenStreetMap, React, Python.</span></div>
+  </div>
+  <div class="entry">
+    <div class="head"><b>Gestion EMIT</b><span class="date">Projet académique</span></div>
+    <div>Gestion des salles et des emplois du temps avec détection des conflits. <span class="stack">ASP.NET Core, PostgreSQL, React.</span></div>
+  </div>
+
+  <h2>Compétences techniques</h2>
+  <div><b>Mobile :</b> Flutter, Dart, Riverpod, SQLite / Drift, PWA</div>
+  <div><b>Frontend :</b> React, Vue.js, Next.js, TypeScript, Tailwind CSS</div>
+  <div><b>Backend :</b> PHP / Laravel, Node.js, NestJS, Python / FastAPI, ASP.NET Core, Prisma</div>
+  <div><b>Bases de données :</b> MySQL, PostgreSQL, MongoDB, Supabase</div>
+  <div><b>DevOps (débutante) :</b> Docker, GitHub Actions, DirectAdmin, o2switch</div>
+  <div><b>Outils :</b> Git, Figma, Vercel, Netlify, Render, Neon</div>
+
+  <h2>Langues</h2>
+  <div>Malagasy : langue maternelle · Français : DELF B2 · Anglais : B2</div>
+
+  <h2>Certificats et attestations</h2>
+  <ul>
+    <li>Attestation de stage – Développeuse mobile (LovaTech, 2026)</li>
+    <li>Attestation de stage – Développeuse full-stack (L2)</li>
+    <li>Certification de participation en hackathon · Certificat en informatique bureautique · Attestation Pix</li>
+  </ul>
+
+  <h2>Projets personnels</h2>
+  <div>'Parentia (Vue 3, Spring Boot) · OuraTable (Laravel, Vue.js) · FeedbackPro (application mobile) · Garage Pro · UltimateChild · Portfolio 3D (React)</div>
+
+  <h2>Centres d'intérêt</h2>
+  <div>Cinéma, séries, basket-ball, cuisine, sport</div>
+</body>
+</html>

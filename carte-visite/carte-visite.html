@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Carte de visite Lucia Rasoanirina</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Format carte de visite standard : 85 × 55 mm, recto puis verso */
+  @page { size: 85mm 55mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; }
+  body { font-family: "Inter", Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card { width: 85mm; height: 55mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; }
+  .card:last-child { page-break-after: auto; break-after: auto; }
+
+  /* Recto */
+  .front { background: #ffffff; padding: 6mm 6.5mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .front::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2mm; background: #0050FF; }
+  .name { font-family: "Poppins", sans-serif; font-weight: 800; font-size: 13pt; color: #0a0a2e; letter-spacing: 0.2pt; line-height: 1.1; }
+  .role { font-family: "Poppins", sans-serif; font-weight: 600; font-size: 7.2pt; color: #0050FF; margin-top: 1.2mm; letter-spacing: 0.3pt; }
+  .rule { width: 9mm; height: 0.6mm; background: #0050FF; margin-top: 2.2mm; border-radius: 1mm; }
+  .contact { display: grid; gap: 1.1mm; font-size: 6.6pt; color: #2b2f45; }
+  .contact div { display: flex; align-items: center; gap: 2mm; }
+  .ico { width: 3.4mm; height: 3.4mm; flex: none; fill: #0050FF; }
+
+  /* Verso */
+  .back { background: linear-gradient(135deg, #18236b 0%, #0c1240 50%, #05051a 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 6mm 7mm; }
+  .back::after { content: ""; position: absolute; width: 50mm; height: 50mm; right: -18mm; top: -22mm; border-radius: 50%; background: radial-gradient(circle, rgba(0,80,255,0.45), transparent 65%); }
+  .mono { width: 15mm; height: 15mm; border-radius: 3mm; background: #0050FF; display: grid; place-items: center; font-family: "Poppins", sans-serif; font-weight: 800; font-size: 15pt; letter-spacing: 0.5pt; box-shadow: 0 2mm 5mm rgba(0,0,0,0.35); }
+  .tag { margin-top: 3mm; font-size: 6.3pt; color: rgba(255,255,255,0.75); line-height: 1.5; }
+  .tag b { color: #fff; font-family: "Poppins", sans-serif; font-weight: 700; font-size: 7.4pt; display: block; margin-bottom: 0.6mm; }
+  .qr { position: relative; z-index: 1; text-align: center; }
+  .qr img { width: 24mm; height: 24mm; display: block; background: #fff; padding: 1.2mm; border-radius: 2mm; }
+  .qr span { display: block; margin-top: 1.4mm; font-size: 5.4pt; color: rgba(255,255,255,0.7); letter-spacing: 0.4pt; }
+</style>
+</head>
+<body>
+  <!-- Recto -->
+  <section class="card front">
+    <div>
+      <div class="name">Lucia Rasoanirina</div>
+      <div class="role">Développeuse Full-Stack &amp; Mobile</div>
+      <div class="rule"></div>
+    </div>
+    <div class="contact">
+      <div><svg class="ico" viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg>+261 38 39 702 36</div>
+      <div><svg class="ico" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>luciarasoanirina8@gmail.com</div>
+      <div><svg class="ico" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>github.com/Lucia-RASOANIRINA</div>
+      <div><svg class="ico" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>Fianarantsoa, Madagascar</div>
+    </div>
+  </section>
+
+  <!-- Verso -->
+  <section class="card back">
+    <div style="position:relative;z-index:1">
+      <div class="mono">LR</div>
+      <div class="tag"><b>Flutter · React · Laravel · NestJS</b>Applications web et mobiles,<br>de la maquette au déploiement.</div>
+    </div>
+    <div class="qr">
+      <img src="qr-portfolio.png" alt="QR code vers le portfolio">
+      <span>Mon portfolio</span>
+    </div>
+  </section>
+</body>
+</html>
